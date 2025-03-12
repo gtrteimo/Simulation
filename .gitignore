@@ -1,8 +1,2 @@
-bin/*
-build/*
-src/glad.c
-include/*
-# src/main2.cpp
-# src/main3.cpp
-src/shaders/*
+.build/*
 .vscode/*
