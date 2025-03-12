@@ -1,0 +1,16 @@
+BasedOnStyle: LLVM
+BreakBeforeBraces: Attach
+ColumnLimit: 0
+SortIncludes: false
+IndentWidth: 4
+TabWidth: 4
+UseTab: ForIndentation
+SpacesBeforeTrailingComments: 1
+BreakBeforeBinaryOperators: None
+BinPackParameters: false
+BinPackArguments: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLoopsOnASingleLine: true
+PenaltyExcessCharacter: 1000000
