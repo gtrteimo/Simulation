@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include ".include/window.hpp"
+#include ".include/window.h"
 
 int main(void) {
 	std::cout << "Hello World!" << std::endl;

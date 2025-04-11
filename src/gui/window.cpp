@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+static bool s = false;
+
 static void inline framebuffer_size_callback([[maybe_unused]] GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
@@ -10,8 +12,13 @@ static void inline processInput([[maybe_unused]] GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
-	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) { // Help
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+		if (s) {
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		} else {
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+		s = !s;
 	}
 }
 
