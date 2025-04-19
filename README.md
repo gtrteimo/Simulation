@@ -1,2 +1,2 @@
 # Simulation
-A particle fluid simulation
+A particle based simulation

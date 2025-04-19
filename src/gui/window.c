@@ -1,8 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
+#include <stdio.h>
 
-static bool s = false;
+static int s = 1;
 
 static void inline framebuffer_size_callback([[maybe_unused]] GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
@@ -24,7 +24,7 @@ static void inline processInput([[maybe_unused]] GLFWwindow *window) {
 
 int createWindow() {
 	if (!glfwInit()) {
-		std::cerr << "Failed to initialize GLFW" << std::endl;
+		fprintf(stderr, "Failed to initialize GLFW\n"); fflush(stderr);
 		return -1;
 	}
 
@@ -35,17 +35,17 @@ int createWindow() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
 
-	GLFWwindow *window = glfwCreateWindow(720, 720, "OpenGL", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(1000, 1000, "OpenGL", NULL, NULL);
 
 	if (!window) {
-		std::cerr << "Failed to create window" << std::endl;
+		fprintf(stderr, "Failed to create window\n"); fflush(stderr);
 		glfwTerminate();
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cerr << "Failed to initialize GLAD" << std::endl;
+		fprintf(stderr, "Failed to initialize GLAD\n"); fflush(stderr);
 		return -1;
 	}
 

@@ -1,7 +1,7 @@
 BasedOnStyle: LLVM
 BreakBeforeBraces: Attach
 ColumnLimit: 0
-SortIncludes: false
+SortIncludes: false #important otherwise code wont work because glad is needed before GFLW
 IndentWidth: 4
 TabWidth: 4
 UseTab: ForIndentation

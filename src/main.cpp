@@ -1,9 +1,7 @@
 #include <iostream>
 
-#include ".include/window.h"
+int startSimulation();
 
 int main(void) {
-	std::cout << "Hello World!" << std::endl;
-	createWindow();
-	return 0;
+	return startSimulation();
 }
