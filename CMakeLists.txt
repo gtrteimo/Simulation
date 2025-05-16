@@ -24,12 +24,24 @@ target_link_libraries(${CMAKE_PROJECT_NAME} glfw)
 target_compile_options(${PROJECT_NAME} PRIVATE
     -pedantic-errors 
     -Wall 
-    -Wextra 
-    -Wconversion 
-    -Wsign-conversion 
-    -Werror
     $<$<CONFIG:Debug>:-g>
     $<$<CONFIG:Release>:-O3 -DNDEBUG>
 )
+
+if(NOT WIN32)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wextra
+        -Wconversion
+        -Wsign-conversion 
+        -Werror
+    )
+
+endif()
+if(WIN32)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        /W4
+        /WX
+    )
+endif()
 
 set_source_files_properties(.dependencies/glad.c PROPERTIES COMPILE_FLAGS "-w")
