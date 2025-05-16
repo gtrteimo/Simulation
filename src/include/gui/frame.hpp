@@ -17,7 +17,12 @@ class Frame {
     Frame(uint16_t frameWidth, uint16_t frameHeight);
 	  ~Frame();
 
+    GLFWwindow* getWindow();
+
+    int input();
     int update();
+
+    
   private:
 
 };

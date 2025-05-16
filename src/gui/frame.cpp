@@ -37,10 +37,19 @@ Frame::~Frame() {
     glfwTerminate();
 }
 
+GLFWwindow* Frame::getWindow() {
+	return window;
+}
+
+int Frame::input() {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+	return 0;
+}
+
 int Frame::update() {
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	// processInput(window);
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();

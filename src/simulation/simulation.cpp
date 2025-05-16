@@ -29,10 +29,11 @@
     }
 
     int Simulation::loop() {
-        while (true) {
+        while (!glfwWindowShouldClose(window.getWindow())) {
             updatePos();
             updateVel();
             updateAcc();
+            window.input();
             window.update();
         }
         return 0;
