@@ -1,14 +1,16 @@
+//Everzthing is C code besides [[maybe_unused]]
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
 static int s = 1;
 
-static void inline framebuffer_size_callback([[maybe_unused]] GLFWwindow *window, int width, int height) {
+static inline void framebuffer_size_callback([[maybe_unused]] GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-static void inline processInput([[maybe_unused]] GLFWwindow *window) {
+static inline void processInput([[maybe_unused]] GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
