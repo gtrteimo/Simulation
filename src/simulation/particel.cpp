@@ -1,11 +1,11 @@
 #include "simulation/particle.hpp"
 
-Particle::Particle(type mass) : Particle(mass, randPer3(), randPer3(), randPer3()) {}
-Particle::Particle(type mass, vector3 position) : Particle(mass, position, randPer3(), randPer3()) {}
-Particle::Particle(type mass, vector3 position, vector3 velocity) : Particle(mass, position, velocity, randPer3()) {}
-Particle::Particle(type mass, vector3 position, vector3 velocity, vector3 acceleration) : Particle(mass, position, velocity, acceleration, {255, 255, 255}) {}
+// Particle::Particle(type mass = 1, type size = 1) : Particle(mass, size, randPer3(), randPer3(), randPer3()) {}
+// Particle::Particle(type mass = 1, type size, vector3 position) : Particle(mass, size, position, randPer3(), randPer3()) {}
+// Particle::Particle(type mass = 1, type size, vector3 position, vector3 velocity) : Particle(mass, size, position, velocity, randPer3()) {}
+// Particle::Particle(type mass = 1, type size, vector3 position, vector3 velocity, vector3 acceleration) : Particle(mass, size, position, velocity, acceleration, {255, 255, 255}) {}
 
-Particle::Particle(type mass, vector3 position, vector3 velocity, vector3 acceleration, colourRGB colour) : mass(mass), position(position), velocity(velocity), acceleration(acceleration), colour(colour) {}
+Particle::Particle(type mass, type size, vector3 position, vector3 velocity, vector3 acceleration, colourRGB colour) : mass(mass), size(size), position(position), velocity(velocity), acceleration(acceleration), colour(colour) {}
 
 Particle::~Particle() {}
 

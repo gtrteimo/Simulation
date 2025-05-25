@@ -136,7 +136,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 # Common warning flags (most compilers understand these or ignore them)
 target_compile_options(${PROJECT_NAME} PRIVATE
     -Wall
-    -pedantic-errors # -pedantic-errors is very strict, -pedantic is often a good balance
               # If you really want errors: -pedantic-errors
 )
 
@@ -159,6 +158,7 @@ if(MSVC) # Microsoft Visual C++
     )
 else() # GCC, Clang, and other non-MSVC compilers
     target_compile_options(${PROJECT_NAME} PRIVATE
+        -pedantic-errors # -pedantic-errors is very strict, -pedantic is often a good balance
         -Wextra            # Even more warnings
         -Werror            # Treat all enabled warnings as errors (can be aggressive)
         -Wconversion       # Warn on implicit conversions that may alter a value (can be noisy)

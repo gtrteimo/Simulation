@@ -1,32 +1,16 @@
-//Everzthing is C code besides [[maybe_unused]]
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
-static int s = 1;
-
 static inline void framebuffer_size_callback([[maybe_unused]] GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-static inline void processInput([[maybe_unused]] GLFWwindow *window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-	}
-	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
-		if (s) {
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		} else {
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		}
-		s = !s;
-	}
-}
-
 int createWindow() {
 	if (!glfwInit()) {
-		fprintf(stderr, "Failed to initialize GLFW\n"); fflush(stderr);
+		fprintf(stderr, "Failed to initialize GLFW\n");
+		fflush(stderr);
 		return -1;
 	}
 
@@ -40,14 +24,16 @@ int createWindow() {
 	GLFWwindow *window = glfwCreateWindow(1000, 1000, "OpenGL", NULL, NULL);
 
 	if (!window) {
-		fprintf(stderr, "Failed to create window\n"); fflush(stderr);
+		fprintf(stderr, "Failed to create window\n");
+		fflush(stderr);
 		glfwTerminate();
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		fprintf(stderr, "Failed to initialize GLAD\n"); fflush(stderr);
+		fprintf(stderr, "Failed to initialize GLAD\n");
+		fflush(stderr);
 		return -1;
 	}
 
@@ -55,12 +41,10 @@ int createWindow() {
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(255, 255, 255, 1.0f);
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		processInput(window);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
