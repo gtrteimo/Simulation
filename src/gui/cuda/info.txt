@@ -1,1 +1,3 @@
-All Future CUDA stuff here if possible
+gtrteimo: All Future CUDA stuff here if possible
+
+21ChiNat:NO. Everything shall be CUDA and CUDA shall be everything
