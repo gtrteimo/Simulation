@@ -1,3 +1,7 @@
 gtrteimo: All Future CUDA stuff here if possible
 
-21ChiNat:NO. Everything shall be CUDA and CUDA shall be everything
+21ChiNat: NO. Everything shall be CUDA and CUDA shall be everything
+
+gtrteimo: AMD??? Intel?? Whatever else exists?? Not everyone has a Nvidia GPU!
+            We are doing cross platform so why can't we also be hardware independent.
+            At least make it optional with something like a CMake variable/option at compile time!

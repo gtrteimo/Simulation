@@ -20,21 +20,7 @@ struct vector3 {
 
 	vector3& operator*=(type scalar);
 
-    bool isValid() const {
-        bool ret = true;
-        if (x < -1 || y < -1 || z < -1) {
-            ret = false;
-        }
-        if (x > 1 || y > 1 || z > 1) {
-            ret = false;
-        }
-        return ret;
-    }
+    bool isValid() const;
 
-
-    void empty() {
-        x = 0;
-        y = 0;
-        z = 0;
-    }
+    void empty();
 };

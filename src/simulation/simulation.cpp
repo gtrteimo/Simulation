@@ -23,6 +23,7 @@
     int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
         while (!glfwWindowShouldClose(window.getWindow())) {
 
+            //Timer start
             auto start_of_iteration = std::chrono::high_resolution_clock::now();
 
             // std::cout << "FPS: " << fps << std::endl;
@@ -30,10 +31,12 @@
             std::vector<vector3> input;
             window.input(input);
 
+            //Left click
             if (input[0].isValid()) {
                 // std::cout << "Mouse Left position: (" << input[0].x << ", " << input[0].y << ")" << std::endl;
                 particles.clear();
             }
+            //Right click
             if (input[1].isValid()) {
                 // std::cout << "Mouse Right position: (" << input[1].x << ", " << input[1].y << ")" << std::endl;
                 addParticle(input[1]);

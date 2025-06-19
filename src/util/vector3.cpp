@@ -22,3 +22,20 @@ vector3& vector3::operator*=(type scalar) {
     z *= scalar;
     return *this;
 }
+
+bool vector3::isValid() const {
+    bool ret = true;
+    if (x < -1 || y < -1 || z < -1) {
+        ret = false;
+    }
+    if (x > 1 || y > 1 || z > 1) {
+        ret = false;
+    }
+    return ret;
+}
+
+void vector3::empty() {
+    x = 0;
+    y = 0;
+    z = 0;
+}
