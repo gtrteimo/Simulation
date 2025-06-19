@@ -17,7 +17,7 @@ int initialiseGLFW () {
 }
 
 /* 
-* These function initialize the simulation with a maximum frame rate of 60 FPS and 0 particles,
+* These function initialize the simulation with a maximum frame rate of 144 FPS and 0 particles,
 * it can be further customized to do other things with the particles
 * Her i have included a function that prints all Particle details to the console.
 * Just have a function with the same parameters and same return value as the example print!
@@ -41,7 +41,7 @@ int startSimulation() {
         return ret;
     }
 
-    Simulation test = Simulation(120, 0);
+    Simulation test = Simulation(144, 0);
     test.loop(print);
     return 0;
 }

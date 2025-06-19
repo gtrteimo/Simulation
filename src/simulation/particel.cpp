@@ -19,9 +19,9 @@ vector3& Particle::updatePos(type dt) {
 //     return acceleration = force * (1.0f / mass);
 // }
 void Particle::applyForce(const vector3& forcePos, const int8_t force) {
-    velocity.x += (force/(abs(forcePos.x - position.x) * abs(forcePos.x - position.x)));
-    velocity.y += (force/(abs(forcePos.y - position.y) * abs(forcePos.y - position.y)));
-    velocity.z += (force/(abs(forcePos.y - position.y) * abs(forcePos.y - position.y)));
+    velocity.x += (force/(std::abs(forcePos.x - position.x) * std::abs(forcePos.x - position.x)));
+    velocity.y += (force/(std::abs(forcePos.y - position.y) * std::abs(forcePos.y - position.y)));
+    velocity.z += (force/(std::abs(forcePos.y - position.y) * std::abs(forcePos.y - position.y)));
 }
 
 void Particle::printParticle() const {

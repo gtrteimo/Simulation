@@ -2,7 +2,7 @@
 #include "simulation/simulation.hpp"
 
     Simulation::Simulation(uint16_t fps, uint64_t particleAmount) : Simulation(fps, 1000, 1000, particleAmount) {}
-    Simulation::Simulation(uint16_t fps, uint16_t frameWidth, uint16_t frameHeight, uint64_t particleAmount) : fps(fps), window(Frame(frameWidth, frameHeight)), draw(Draw(window)), particles(std::vector<Particle>(particleAmount, Particle(5.0))) {}
+    Simulation::Simulation(uint16_t fps, uint16_t frameWidth, uint16_t frameHeight, uint64_t particleAmount) : fps(fps+1), window(Frame(frameWidth, frameHeight)), draw(Draw(window)), particles(std::vector<Particle>(particleAmount, Particle(5.0))) {}
     
     Simulation::~Simulation() {
         particles.clear();
@@ -21,12 +21,13 @@
     }
 
     int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
+
+        const std::chrono::nanoseconds frameTime(static_cast<long long>(1e9 / fps)); // Duration of one frame in nanoseconds
+
         while (!glfwWindowShouldClose(window.getWindow())) {
 
             //Timer start
-            auto start_of_iteration = std::chrono::high_resolution_clock::now();
-
-            // std::cout << "FPS: " << fps << std::endl;
+            auto start = std::chrono::high_resolution_clock::now();
 
             std::vector<vector3> input;
             window.input(input);
@@ -54,11 +55,22 @@
 
             glfwPollEvents();
 
-            auto end_of_iteration = std::chrono::high_resolution_clock::now();
+            auto end = std::chrono::high_resolution_clock::now();
 
-            long long iteration_duration_us = std::chrono::duration_cast<std::chrono::microseconds>(end_of_iteration - start_of_iteration).count(); 
+            auto duration = end - start;
 
-            std::cout << "Duration: " << iteration_duration_us << " microseconds" << std::endl;
+            auto target_end_time = start + frameTime;
+            
+             if (duration < frameTime) {
+                std::this_thread::sleep_until(target_end_time);
+            }
+
+            auto end2 = std::chrono::high_resolution_clock::now();
+
+            auto duration2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end2 - start);
+
+            double currentFps = static_cast<double>(1e9) / static_cast<double>(duration2.count());
+            std::cout << "FPS: " << static_cast<int>(currentFps) << std::endl;
         }
         return 0;
     }
