@@ -28,4 +28,6 @@ class Particle {
 	vector3 &updateAcc();
 	vector3 &applyForce(vector3 &f);
 	vector3 &resetForce();
+
+	void printParticle() const;
 };

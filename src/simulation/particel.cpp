@@ -24,3 +24,15 @@ vector3& Particle::applyForce(vector3& f) {
 vector3& Particle::resetForce() {
     return force = {0, 0, 0};
 }
+
+void Particle::printParticle() const {
+    std::cout << "Particle: { "
+        << "Mass: " << mass << ", "
+        << "Size: " << size << ", "
+        << "Position: (" << position.x << "/" << position.y << "/" << position.z << "), "
+        << "Velocity: (" << velocity.x << "/" << velocity.y << "/" << velocity.z << "), "
+        << "Acceleration: (" << acceleration.x << "/" << acceleration.y << "/" << acceleration.z << "), "
+        << "Force: (" << force.x << "/" << force.y << "/" << force.z << "), "
+        << "Colour: (" << colour.r << "/" << colour.g << "/" << colour.b << ") "
+        << "}";
+}

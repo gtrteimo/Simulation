@@ -114,7 +114,7 @@ Draw::~Draw() {
 
 int Draw::drawParticles(const std::vector<Particle> &particles) {
 	for (const Particle &particle : particles) {
-		drawCircle(particle.position, particle.size, particle.colour, true, 8);
+		drawCircle(particle.position, particle.size, particle.colour, true, 32);
 		// drawRectangle(particle.position, particle.size, particle.size, particle.colour, true);
 
 	}
@@ -122,7 +122,7 @@ int Draw::drawParticles(const std::vector<Particle> &particles) {
 }
 
 int Draw::drawParticle(const Particle &particle) {
-	return drawCircle(particle.position, particle.size, particle.colour, true, 8);
+	return drawCircle(particle.position, particle.size, particle.colour, true, 32);
 }
 
 int Draw::drawLine(const vector3 &start, const vector3 &end, const colourRGB &colour) {
@@ -181,8 +181,8 @@ int Draw::drawCircle(const vector3 center, type radius, const colourRGB &colour,
 	type ndc_radius_x = static_cast<type>((radius));
 	type ndc_radius_y = static_cast<type>((radius));
 
-	std::cout << "NDC Center: (" << ndc_center_x << ", " << ndc_center_y
-	          << "), Radius: (" << ndc_radius_x << ", " << ndc_radius_y << ")" << std::endl;
+	// std::cout << "NDC Center: (" << ndc_center_x << ", " << ndc_center_y
+	//           << "), Radius: (" << ndc_radius_x << ", " << ndc_radius_y << ")" << std::endl;
 
 	vertex_buffer_data.clear();
 	if (filled) {
