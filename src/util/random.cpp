@@ -8,3 +8,6 @@ type randPer() {
 vector3 randPer3() {
     return {randPer(), randPer(), randPer()};
 }
+vector2 randPer2() {
+    return {randPer(), randPer()};
+}

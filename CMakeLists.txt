@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12) # Increased for FetchContent, modern CMake 
 project(Simulation VERSION 0.1 LANGUAGES C CXX)
 
 # --- Project Options (can be changed by user e.g. with cmake-gui or -D) ---
-option(SIM_USE_FETCHCONTENT_FOR_GLFW "Download GLFW using FetchContent instead of using a local copy" OFF)
+option(SIM_USE_FETCHCONTENT_FOR_GLFW "Download GLFW using FetchContent instead of using a local copy" ON)
 option(SIM_GLFW_STATIC_LIB "Build GLFW as a static library" ON) # Default to static for GLFW
 
 # --- C++ Standard ---

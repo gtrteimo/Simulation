@@ -125,7 +125,7 @@ int Draw::drawParticle(const Particle &particle) {
 	return drawCircle(particle.position, particle.size, particle.colour, true, 32);
 }
 
-int Draw::drawLine(const vector3 &start, const vector3 &end, const colourRGB &colour) {
+int Draw::drawLine(const vector2 &start, const vector2 &end, const colourRGB &colour) {
 	if (!window || shaderProgramID == 0) return -1;
 
 	int screenWidth, screenHeight;
@@ -167,7 +167,7 @@ int Draw::drawLine(const vector3 &start, const vector3 &end, const colourRGB &co
 }
 
 // Signature matches header: const vector3& center
-int Draw::drawCircle(const vector3 center, type radius, const colourRGB &colour, bool filled, int segments) {
+int Draw::drawCircle(const vector2 center, type radius, const colourRGB &colour, bool filled, int segments) {
 	if (!window || shaderProgramID == 0) return -1;
 	if (segments < 3) segments = 3;
 
@@ -224,7 +224,7 @@ int Draw::drawCircle(const vector3 center, type radius, const colourRGB &colour,
 	return 0;
 }
 
-int Draw::drawRectangle(const vector3 &position, type width, type height, const colourRGB &colour, bool filled) {
+int Draw::drawRectangle(const vector2 &position, type width, type height, const colourRGB &colour, bool filled) {
 	if (!window || shaderProgramID == 0) return -1;
 
 	int screenWidth, screenHeight;
@@ -295,7 +295,7 @@ int Draw::drawRectangle(const vector3 &position, type width, type height, const 
 	return 0;
 }
 
-int Draw::drawText(const std::string &text, const vector3 &position, const colourRGB &colour) {
+int Draw::drawText(const std::string &text, const vector2 &position, const colourRGB &colour) {
 	// To avoid unused parameter warnings if you don't implement it yet:
 	(void)text;
 	(void)position;

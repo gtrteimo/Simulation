@@ -5,7 +5,7 @@
 #include <chrono>
 #include <thread>
 
-#include "util/vector3.hpp"
+#include "util/vector2.hpp"
 #include "util/colour.h"
 
 #include "gui/frame.hpp"
@@ -28,7 +28,7 @@ class Simulation {
 
     int loop(std::function<int(std::vector<Particle>)> function);
 
-    void addForce(const vector3& pos);
-    void removeForce(const vector3& pos);
-    void addParticle(const vector3& pos);
+    void addForce(const vector2& pos);
+    void removeForce(const vector2& pos);
+    void addParticle(const vector2& pos);
 };

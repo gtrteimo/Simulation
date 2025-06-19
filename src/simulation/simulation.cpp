@@ -22,27 +22,46 @@
 
     int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
 
-        const std::chrono::nanoseconds frameTime(static_cast<long long>(1e9 / fps)); // Duration of one frame in nanoseconds
+        // Duration of one frame in nanoseconds
+        const std::chrono::nanoseconds frameTime(static_cast<long long>(1e9 / fps)); 
 
         while (!glfwWindowShouldClose(window.getWindow())) {
 
             //Timer start
             auto start = std::chrono::high_resolution_clock::now();
 
-            std::vector<vector3> input;
-            window.input(input);
+            std::vector<InputType> inputs = window.input();
 
-            //Left click
-            if (input[0].isValid()) {
-                // std::cout << "Mouse Left position: (" << input[0].x << ", " << input[0].y << ")" << std::endl;
-                particles.clear();
+            for (InputType input : inputs) {
+                //Better switch because switch does not work for variants. It does look hard on the eye but it work similar to a switch
+                std::visit([this](auto&& arg) {
+                    using T = std::decay_t<decltype(arg)>;
+
+                    if constexpr (std::is_same_v<T, Mouse::LeftClick>) {
+                        std::cout << "Mouse Left Click at (" << arg.position.x << ", " << arg.position.y << ")\n"; //TODO force (the longer you hold the bigger the force becomes)
+                    } 
+                    else if constexpr (std::is_same_v<T, Mouse::RightClick>) {
+                        std::cout << "Mouse Right Click at (" << arg.position.x << ", " << arg.position.y << ")\n";
+                    }
+                    else if constexpr (std::is_same_v<T, Mouse::MiddleClick>) {
+                        std::cout << "Mouse Middle Click at (" << arg.position.x << ", " << arg.position.y << ")\n";
+                        addParticle(arg.position);
+                    }
+                    else if constexpr (std::is_same_v<T, Keyboard::KeyPressed>) {
+                        std::cout << "Keyboard Key Pressed: " << static_cast<char>(arg.keyCode) << " (code: " << arg.keyCode << ")\n";
+                    }
+                    else if constexpr (std::is_same_v<T, Keyboard::KeyReleased>) {
+                        std::cout << "Keyboard Key Released: " << static_cast<char>(arg.keyCode) << " (code: " << arg.keyCode << ")\n";
+                    }
+                    else if constexpr (std::is_same_v<T, Keyboard::KeyHeld>) {
+                        std::cout << "Keyboard Key Held: " << arg.keyCode << " (code: " << static_cast<int>(arg.keyCode) << ")\n";
+                        this->particles.clear();
+                    }
+                }, input);
             }
-            //Right click
-            if (input[1].isValid()) {
-                // std::cout << "Mouse Right position: (" << input[1].x << ", " << input[1].y << ")" << std::endl;
-                addParticle(input[1]);
-            }
-            
+
+            std::cout << "--- Input Processing Finished ---\n";
+
             if (int ret = (function(particles)) < 0) {
                 return ret;
             }
@@ -75,17 +94,17 @@
         return 0;
     }
 
-    void Simulation::addForce(const vector3& pos) {
+    void Simulation::addForce(const vector2& pos) {
         for (Particle particle : particles) {
-            particle.applyForce(pos, 5);
+            particle.applyForce(pos, 10);
         }
     }
-    void Simulation::removeForce(const vector3& pos) {
+    void Simulation::removeForce(const vector2& pos) {
         for (Particle particle : particles) {
-            particle.applyForce(pos, -5);
+            particle.applyForce(pos, -10);
         }
     }
-    void Simulation::addParticle(const vector3& pos) {
+    void Simulation::addParticle(const vector2& pos) {
         particles.push_back(Particle(1.0, 0.1, pos));
     }
 

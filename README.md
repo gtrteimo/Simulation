@@ -1,6 +1,13 @@
 # Simulation
 
-A crossplatform particle based simulation using C++ in combination with OpenGL.
+A cross-platform particle based simulation using C++ in combination with OpenGL.
+
+## Current Keybinds
+
+- Left click: add force
+- Right click: remove force
+- Middle click: add particle
+- C/c: clear all particles
 
 ## Dependencies
 
@@ -21,12 +28,12 @@ This is only what we needed. You might not need some or there might even be some
 
 ### Windows 11
 
-- Cmake
+- CMake
 - MVSC/Clang MVSC (not Clang GNU on Windows)
 
 ### MacOS (not tested and not supported)
 
-##### Just taking a guess:
+#### Just thinking logically:
 
 - Clang
-- Cmake
+- CMake

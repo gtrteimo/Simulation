@@ -2,12 +2,13 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <stdexcept>
 #include <vector>
 
 #include "util/types.h"
-#include "util/vector3.hpp" // Assuming this defines vector3 and type
-// If 'type' is not defined in vector3.hpp, ensure it's defined (e.g., typedef double type;)
+#include "util/vector2.hpp"
+#include "util/inputTypes.hpp"
 
 class Frame {
   private:
@@ -26,14 +27,12 @@ class Frame {
     // Or implement proper move semantics if moving a Frame object is desired.
     Frame(const Frame&) = delete;
     Frame& operator=(const Frame&) = delete;
-    Frame(Frame&&) = delete; // For simplicity, disable move too. Implement if needed.
-    Frame& operator=(Frame&&) = delete; // For simplicity, disable move too. Implement if needed.
+    Frame(Frame&&) = delete; 
+    Frame& operator=(Frame&&) = delete;
 
-    GLFWwindow *getWindow() const; // Make it const
+    GLFWwindow *getWindow() const;
     uint16_t getFrameWidth() const;
     uint16_t getFrameHeight() const;
 
-    // Input and Update methods
-    int input(std::vector<vector3> &ret);
-    // bool shouldClose() const;
+    std::vector<InputType> input();
 };
