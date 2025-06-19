@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "util/vector3.hpp"
 #include "util/random.hpp"
 #include "util/colour.h"
@@ -11,7 +13,6 @@ class Particle {
 	vector3 position = {};
 	vector3 velocity = {0, 0, 0};
 	vector3 acceleration = {0, 0, 0};
-	vector3 force = {0, 0, 0};
 	colourRGB colour = {255, 255, 255};
 
   public:
@@ -23,11 +24,10 @@ class Particle {
 
 	~Particle();
 
-	vector3 &updatePos(type dt);
-	vector3 &updateVel(type dt);
-	vector3 &updateAcc();
-	vector3 &applyForce(vector3 &f);
-	vector3 &resetForce();
+	vector3 &updatePos(const type dt);
+	// vector3 &updateVel(const type dt);
+	// vector3 &updateAcc();
+	void applyForce(const vector3& forcePos,const int8_t force);
 
 	void printParticle() const;
 };

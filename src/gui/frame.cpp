@@ -78,10 +78,10 @@ uint16_t Frame::getFrameHeight() const {
     return frameHeight;
 }
 
-bool Frame::shouldClose() const {
-    if (!window) return true;
-    return glfwWindowShouldClose(window);
-}
+// bool Frame::shouldClose() const {
+//     if (!window) return true;
+//     return glfwWindowShouldClose(window);
+// }
 
 // Helper free functions (could be static members or in a utility namespace)
 // Note: 'type' needs to be defined (e.g. typedef double type;)
@@ -103,7 +103,9 @@ vector3 MouseClick(GLFWwindow *window, int button) { // Combined helper
 int Frame::input(std::vector<vector3> &ret) {
     ret.assign(2, vector3(-2, -2, -2)); // Resize and initialize
 
-    if (!window) return -2; // Window doesn't exist
+    if (!window) {
+        return -2; // Window doesn't exist
+    } 
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -139,15 +141,4 @@ int Frame::input(std::vector<vector3> &ret) {
         }
     }
     return 0;
-}
-
-void Frame::update() { // Changed to void
-    if (!window) return;
-    // Clear screen is often part of the rendering pass, not generic frame update.
-    // If Draw class also clears, this might be redundant or intentional.
-    // glClear(GL_COLOR_BUFFER_BIT); //  Moved to Draw::clearScreen or main render loop
-
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-    // return 0;
 }

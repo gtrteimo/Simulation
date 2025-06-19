@@ -35,6 +35,5 @@ class Frame {
 
     // Input and Update methods
     int input(std::vector<vector3> &ret);
-    void update(); // Changed return type to void, unless int is significant
-    bool shouldClose() const;
+    // bool shouldClose() const;
 };
