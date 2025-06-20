@@ -23,6 +23,13 @@ vector3& vector3::operator*=(type scalar) {
     return *this;
 }
 
+vector3& vector3::operator/=(type scalar) {
+    x /= scalar;
+    y /= scalar;
+    z /= scalar;
+    return *this;
+}
+
 bool vector3::isValid() const {
     bool ret = true;
     if (x < -1 || y < -1 || z < -1) {

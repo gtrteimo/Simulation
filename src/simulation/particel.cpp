@@ -1,29 +1,41 @@
-#include "simulation/particle.hpp"
+#include "simulation/particle.hpp" // Include the Particle class header
 
-Particle::Particle(type mass, type size, vector2 position, vector2 velocity, colourRGB colour) : mass(mass), size(size), position(position), velocity(velocity), colour(colour) {}
+Particle::Particle(type mass, type size, vector2 position, vector2 velocity, colourRGB colour) : mass(mass), size(size), position(position), velocity(velocity), acceleration({0, 0}), force({0, 0}), colour(colour){
+    if (this->mass <= 0) {
+        std::cerr << "Warning: Particle created with non-positive mass (" << this->mass << "). Setting mass to 1.0 to prevent division by zero.\n";
+        const_cast<type&>(this->mass) = 1.0; 
+    }
+}
 
 Particle::~Particle() {}
 
-vector2& Particle::updatePos(type dt) {
-    return position += velocity*dt;
+void Particle::updateAccVel(type dt) {
+    if (mass <= 0) {
+        return; 
+    } 
+    acceleration = force / mass;
+        printParticle();
+    force.empty();
+    velocity += acceleration * dt;
+    std::cout << "Acceleration: x: " << acceleration.x << ", y: " << acceleration.y << std::endl;
 }
-// vector3& Particle::updateVel(type dt) {
-//     return velocity += acceleration*dt;
-// }
-// vector3& Particle::updateAcc() {
-//     return acceleration = force * (1.0f / mass);
-// }
-void Particle::applyForce(const vector2& forcePos, const int8_t force) {
-    velocity.x += (force/(std::abs(forcePos.x - position.x) * std::abs(forcePos.x - position.x)));
-    velocity.y += (force/(std::abs(forcePos.y - position.y) * std::abs(forcePos.y - position.y)));
+void Particle::updatePos(type dt) {
+    position += velocity * dt;
+}
+
+void Particle::applyForce(const vector2& newForce) {
+    force += newForce;
+    std::cout << "Force: x: " << force.x << ", y: " << force.y << std::endl;
 }
 
 void Particle::printParticle() const {
     std::cout << "Particle: { "
-        << "Mass: " << mass << ", "
-        << "Size: " << size << ", "
-        << "Position: (" << position.x << "/" << position.y << "), "
-        << "Velocity: (" << velocity.x << "/" << velocity.y << "), "
-        << "Colour: (" << colour.r << "/" << colour.g << "/" << colour.b << ") "
-        << "}";
+        << "  Mass: " << mass << ", "
+        << "  Size: " << size << ", "
+        << "  Position: (" << position.x << ", " << position.y << "), "
+        << "  Velocity: (" << velocity.x << ", " << velocity.y << "), "
+        << "  Acceleration: (" << acceleration.x << ", " << acceleration.y << "), "
+        << "  Force (pre-reset): (" << force.x << ", " << force.y << "), "
+        << "  Colour: (R:" << static_cast<uint16_t>(colour.r) << ", G:" << static_cast<uint16_t>(colour.g) << ", B:" << static_cast<uint16_t>(colour.b) << ") "
+        << "}\n";
 }

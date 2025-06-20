@@ -13,11 +13,17 @@ struct vector2 {
 
     vector2 operator+(const vector2& other) const;
 
-    vector2 operator*(type scalar) const;
+    vector2 operator*(const type scalar) const;
+
+    vector2 operator/(const type scalar) const;
 
     vector2& operator+=(const vector2& other);
 
-	vector2& operator*=(type scalar);
+	vector2& operator*=(const type scalar);
+
+	vector2& operator/=(const type scalar);
+
+    vector2 operator-() const;
 
     bool isValid() const;
 

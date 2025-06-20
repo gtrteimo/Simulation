@@ -41,7 +41,7 @@ int startSimulation() {
 		return ret;
 	}
 
-	Simulation test = Simulation(144, 0);
+	Simulation test = Simulation(144, 1);
 	test.loop(print);
 	return 0;
 }

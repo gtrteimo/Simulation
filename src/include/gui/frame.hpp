@@ -33,6 +33,4 @@ class Frame {
     GLFWwindow *getWindow() const;
     uint16_t getFrameWidth() const;
     uint16_t getFrameHeight() const;
-
-    std::vector<InputType> input();
 };

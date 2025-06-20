@@ -1,6 +1,6 @@
 #include "simulation/draw.hpp"
 
-#ifndef M_PI // Might not have been defined
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
@@ -59,15 +59,10 @@ GLuint Draw::linkShaderProgram(GLuint vertexShader, GLuint fragmentShader) {
 	return program;
 }
 
-// --- Constructor and Destructor ---
 Draw::Draw(Frame &existingFrame) : window(existingFrame.getWindow()), shaderProgramID(0), shapeVAO(0), shapeVBO(0) {
 	if (!this->window) { // Use this->window to be explicit
 		throw std::runtime_error("Failed to get GLFW window from Frame for Draw object");
 	}
-
-	// It's important that an OpenGL context is current here.
-	// The Frame constructor should have called glfwMakeContextCurrent.
-	// GLAD should also have been loaded by the Frame or main app.
 
 	// Compile and link shaders (same as before)
 	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
@@ -110,8 +105,6 @@ Draw::~Draw() {
 	}
 }
 
-// --- Drawing API Implementations ---
-
 int Draw::drawParticles(const std::vector<Particle> &particles) {
 	for (const Particle &particle : particles) {
 		drawCircle(particle.position, particle.size, particle.colour, true, 32);
@@ -147,7 +140,7 @@ int Draw::drawLine(const vector2 &start, const vector2 &end, const colourRGB &co
 	glUseProgram(shaderProgramID);
 	GLint colorLocation = glGetUniformLocation(shaderProgramID, "u_Color");
 	if (colorLocation != -1) { // Good practice to check if uniform is found
-		glUniform3f(colorLocation, colour.r, colour.g, colour.b);
+		glUniform3f(colorLocation, static_cast<float>(colour.r)/255.0f, static_cast<float>(colour.g)/255.0f, static_cast<float>(colour.b)/255.0f);
 	} else {
 		std::cerr << "Warning: u_Color uniform not found in shader program " << shaderProgramID << std::endl; // ADD THIS
 	}
@@ -166,7 +159,6 @@ int Draw::drawLine(const vector2 &start, const vector2 &end, const colourRGB &co
 	return 0;
 }
 
-// Signature matches header: const vector3& center
 int Draw::drawCircle(const vector2 center, type radius, const colourRGB &colour, bool filled, int segments) {
 	if (!window || shaderProgramID == 0) return -1;
 	if (segments < 3) segments = 3;
@@ -201,7 +193,7 @@ int Draw::drawCircle(const vector2 center, type radius, const colourRGB &colour,
 	glUseProgram(shaderProgramID);
 	GLint colorLocation = glGetUniformLocation(shaderProgramID, "u_Color");
 	if (colorLocation != -1) {
-		glUniform3f(colorLocation, colour.r, colour.g, colour.b);
+		glUniform3f(colorLocation, static_cast<float>(colour.r)/255.0f, static_cast<float>(colour.g)/255.0f, static_cast<float>(colour.b)/255.0f);
 	} else {
 		std::cerr << "Warning: u_Color uniform not found in shader program " << shaderProgramID << std::endl; // ADD THIS
 	}
@@ -272,7 +264,7 @@ int Draw::drawRectangle(const vector2 &position, type width, type height, const 
 	glUseProgram(shaderProgramID);
 	GLint colorLocation = glGetUniformLocation(shaderProgramID, "u_Color");
 	if (colorLocation != -1) {
-		glUniform3f(colorLocation, colour.r, colour.g, colour.b);
+		glUniform3f(colorLocation, static_cast<float>(colour.r)/255.0f, static_cast<float>(colour.g)/255.0f, static_cast<float>(colour.b)/255.0f);
 	} else {
 		std::cerr << "Warning: u_Color uniform not found in shader program " << shaderProgramID << std::endl; // ADD THIS
 	}

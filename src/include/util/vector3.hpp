@@ -20,6 +20,8 @@ struct vector3 {
 
 	vector3& operator*=(type scalar);
 
+    vector3& operator/=(type scalar);
+
     bool isValid() const;
 
     void empty();

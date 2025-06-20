@@ -1,30 +1,31 @@
 #pragma once
 
-#include <cmath>
-
+#include "util/types.h"
 #include "util/vector2.hpp"
-#include "util/random.hpp"
 #include "util/colour.h"
+#include "util/random.hpp"
+
+#include <iostream>
 
 class Particle {
   public:
-	const type mass;
-	const type size;
-	vector2 position = {};
-	vector2 velocity = {0, 0};
-	colourRGB colour = {255, 255, 255};
+    const type mass;
+    const type size;
+    vector2 position;
+    vector2 velocity;
+    vector2 acceleration;
+    vector2 force;
+    colourRGB colour;
 
   public:
-	// Particle(type mass, type size);
-	// Particle(type mass, type size, vector3 position);
-	// Particle(type mass, type size, vector3 position, vector3 velocity);
-	// Particle(type mass, type size, vector3 position, vector3 velocity, vector3 acceleration);
-	Particle(type mass = 1, type size = 5.0, vector2 position = /*randPer2()*/{500, 500}, vector2 velocity = {0, 0}, colourRGB colour = {255, 255, 255});
+    Particle(type mass = 1.0, type size = 0.05, vector2 position = {0, 0}, vector2 velocity = {0, 0}, colourRGB colour = randLightColour());
 
-	~Particle();
+    ~Particle();
 
-	vector2 &updatePos(const type dt);
-	void applyForce(const vector2& forcePos,const int8_t force);
+	void updateAccVel(type dt);
+    void updatePos(type dt); 
+    
+    void applyForce(const vector2& force);
 
-	void printParticle() const;
+    void printParticle() const;
 };

@@ -18,8 +18,10 @@ class Simulation {
     Frame window;
     Draw draw;
     std::vector<Particle> particles;
-
+  public:
+    static Simulation* sim;
   private:
+    inline  int updateAccVel();
     inline  int updatePos();
   public:
     Simulation(uint16_t fps, uint64_t particleAmount);
@@ -28,7 +30,11 @@ class Simulation {
 
     int loop(std::function<int(std::vector<Particle>)> function);
 
+    int inputHold();
+    static void inputMouseTap(GLFWwindow* window, int button, int action, int mods);
+    static void inputKeyboardTap(GLFWwindow* window, int key, int scancode, int action, int mods);
+
     void addForce(const vector2& pos);
     void removeForce(const vector2& pos);
-    void addParticle(const vector2& pos);
+    void addParticle(const vector2& pos, uint64_t amount);
 };
