@@ -97,7 +97,7 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
                     for (Particle particle : particles) {
                         particle.printParticle();
                     }
-                    // addParticle(position, middleMouseButtonHeld/2);
+                    addParticle(position, 1);
                 }
             }
 
@@ -137,7 +137,7 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
 	return 0;
 }
 
-void Simulation::inputMouseTap(GLFWwindow* window, int button, int action, int mods) {
+void Simulation::inputMouseTap(GLFWwindow* window, int button, int action, [[maybe_unused]] int mods) {
 
     if (!window) {
 		return;
@@ -171,7 +171,7 @@ void Simulation::inputMouseTap(GLFWwindow* window, int button, int action, int m
     }
 
 }
-void Simulation::inputKeyboardTap(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void Simulation::inputKeyboardTap(GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {
 
     if (!window) {
 		return;
