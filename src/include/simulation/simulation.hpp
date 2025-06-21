@@ -25,7 +25,7 @@ class Simulation {
     inline  int updateAccVel();
     inline  int updatePos();
   public:
-	  Simulation(uint16_t fps = 60, uint16_t frameWidth=1000, uint16_t frameHeight=1000, uint64_t particleAmount=0, bool particleCollision);
+	  Simulation(uint16_t fps = 60, uint16_t frameWidth=1000, uint16_t frameHeight=1000, uint64_t particleAmount=0, bool particleCollision = false);
 	  ~Simulation();
 
     int loop(std::function<int(std::vector<Particle>)> function);
