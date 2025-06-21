@@ -107,7 +107,7 @@ Draw::~Draw() {
 
 int Draw::drawParticles(const std::vector<Particle> &particles) {
 	for (const Particle &particle : particles) {
-		drawCircle(particle.position, particle.size, particle.colour, true, 32);
+		drawCircle(particle.getPosition(), particle.getSize(), particle.getColour(), true, 32);
 		// drawRectangle(particle.position, particle.size, particle.size, particle.colour, true);
 
 	}
@@ -115,7 +115,7 @@ int Draw::drawParticles(const std::vector<Particle> &particles) {
 }
 
 int Draw::drawParticle(const Particle &particle) {
-	return drawCircle(particle.position, particle.size, particle.colour, true, 32);
+	return drawCircle(particle.getPosition(), particle.getSize(), particle.getColour(), true, 32);
 }
 
 int Draw::drawLine(const vector2 &start, const vector2 &end, const colourRGB &colour) {

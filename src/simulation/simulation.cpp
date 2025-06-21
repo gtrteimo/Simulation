@@ -7,8 +7,7 @@ static uint64_t middleMouseButtonHeld = 0;
 
 Simulation* Simulation::sim = nullptr;
 
-Simulation::Simulation(uint16_t fps, uint64_t particleAmount) : Simulation(fps, 1000, 1000, particleAmount) {}
-Simulation::Simulation(uint16_t fps, uint16_t frameWidth, uint16_t frameHeight, uint64_t particleAmount) : fps(fps + 1), window(Frame(frameWidth, frameHeight)), draw(Draw(window)), particles(std::vector<Particle>(particleAmount, Particle(1.0))) {sim = this;}
+Simulation::Simulation(uint16_t fps, uint16_t frameWidth, uint16_t frameHeight, uint64_t particleAmount, bool particleCollision) : fps(fps + 1), window(Frame(frameWidth, frameHeight)), draw(Draw(window)), particles(std::vector<Particle>(particleAmount, Particle(1.0))), particleCollision(particleCollision) {sim = this;}
 
 Simulation::~Simulation() {
 	particles.clear();
@@ -67,7 +66,7 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
             if (x >= 0 && y >= 0) {
                 vector2 position = (normalize(window.getWindow(), {static_cast<type>(x), static_cast<type>(y)}));
                 if (position.isValid()) {
-                    std::cout << "Mouse Left Held at (" << position.x << ", " << position.y << ")\n"; // TODO force (the longer you hold the bigger the force becomes)
+                    // std::cout << "Mouse Left Held at (" << position.x << ", " << position.y << ")\n"; // TODO force (the longer you hold the bigger the force becomes)
                     addForce(position);
                 }
             }
@@ -80,7 +79,7 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
             if (x >= 0 && y >= 0) {
                 vector2 position = (normalize(window.getWindow(), {static_cast<type>(x), static_cast<type>(y)}));
                 if (position.isValid()) {
-                    std::cout << "Mouse Right Held at (" << position.x << ", " << position.y << ")\n"; // TODO force (the longer you hold the bigger the force becomes)
+                    // std::cout << "Mouse Right Held at (" << position.x << ", " << position.y << ")\n"; // TODO force (the longer you hold the bigger the force becomes)
                     removeForce(position);
                 }
             }
@@ -93,10 +92,10 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
             if (x >= 0 && y >= 0) {
                 vector2 position = (normalize(window.getWindow(), {static_cast<type>(x), static_cast<type>(y)}));
                 if (position.isValid()) {
-                    std::cout << "Mouse Middle Held at (" << position.x << ", " << position.y << ")\n"; // TODO force (the longer you hold the bigger the force becomes)
-                    for (Particle particle : particles) {
-                        particle.printParticle();
-                    }
+                    // std::cout << "Mouse Middle Held at (" << position.x << ", " << position.y << ")\n"; // TODO force (the longer you hold the bigger the force becomes)
+                    // for (Particle particle : particles) {
+                    //     particle.printParticle();
+                    // }
                     addParticle(position, 1);
                 }
             }
@@ -107,6 +106,10 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
 		if (int ret = (function(particles)) < 0) {
 			return ret;
 		}
+
+        // particles.at(0).printForce();
+
+        
 
         updateAccVel();
 		updatePos();
@@ -131,8 +134,8 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
 
 		auto duration2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end2 - start);
 
-		double currentFps = static_cast<double>(1e9) / static_cast<double>(duration2.count());
-		std::cout << "FPS: " << static_cast<int>(currentFps) << std::endl;
+		// double currentFps = static_cast<double>(1e9) / static_cast<double>(duration2.count());
+		// std::cout << "FPS: " << static_cast<int>(currentFps) << std::endl;
 	}
 	return 0;
 }
@@ -183,18 +186,19 @@ void Simulation::inputKeyboardTap(GLFWwindow* window, int key, [[maybe_unused]] 
 	}
 
     if (key == GLFW_KEY_C && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-        std::cout << "Key C pressed down\n";
+        // std::cout << "Key C pressed down\n";
         sim->particles.clear();
     }
 }
 
 void Simulation::addForce(const vector2 &pos) {
-	for (Particle particle : particles) {
+	for (Particle& particle : particles) {
 		particle.applyForce(pos);
+        particle.printForce();
 	}
 }
 void Simulation::removeForce(const vector2 &pos) {
-	for (Particle particle : particles) {
+	for (Particle& particle : particles) {
 		particle.applyForce(-pos);
 	}
 }

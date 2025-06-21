@@ -20,15 +20,18 @@ uint8_t randByte() {
 colourRGB randColour(){
     return {randByte(), randByte(), randByte()};
 }
-colourRGB randLightColour(){
-    uint8_t r = randByte();
-    uint8_t g = randByte();
-    uint8_t b = 0;
-    if (510 - (r+g) > 255) {
-        b = randByte();
-    } else {
-        b = static_cast<uint8_t>(510 - static_cast<uint16_t>(r+g));
-    }
+colourRGB randDarkColour(){
+    uint8_t r = randByte() / 2;
+    uint8_t g = randByte() / 2;
+    uint8_t b = randByte() / 2;
     return {r, g, b};
 }
+
+colourRGB randLightColour() {
+    uint8_t r = randByte() / 2 + 128;
+    uint8_t g = randByte() / 2 + 128;
+    uint8_t b = randByte() / 2 + 128;
+    return {r, g, b};
+}
+
 

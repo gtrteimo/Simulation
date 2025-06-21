@@ -8,7 +8,7 @@
 #include <iostream>
 
 class Particle {
-  public:
+  private:
     const type mass;
     const type size;
     vector2 position;
@@ -22,10 +22,18 @@ class Particle {
 
     ~Particle();
 
-	void updateAccVel(type dt);
+    vector2 getPosition() const;
+    type getSize() const;
+    colourRGB getColour() const;
+
+	  void updateAccVel(type dt);
     void updatePos(type dt); 
     
     void applyForce(const vector2& force);
 
     void printParticle() const;
+
+    void printForce() {
+      std::cout << force << std::endl;
+    }
 };

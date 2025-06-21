@@ -18,14 +18,14 @@ class Simulation {
     Frame window;
     Draw draw;
     std::vector<Particle> particles;
+    bool particleCollision;
   public:
     static Simulation* sim;
   private:
     inline  int updateAccVel();
     inline  int updatePos();
   public:
-    Simulation(uint16_t fps, uint64_t particleAmount);
-	  Simulation(uint16_t fps, uint16_t frameWidth, uint16_t frameHeight, uint64_t particleAmount);
+	  Simulation(uint16_t fps = 60, uint16_t frameWidth=1000, uint16_t frameHeight=1000, uint64_t particleAmount=0, bool particleCollision);
 	  ~Simulation();
 
     int loop(std::function<int(std::vector<Particle>)> function);
@@ -37,4 +37,7 @@ class Simulation {
     void addForce(const vector2& pos);
     void removeForce(const vector2& pos);
     void addParticle(const vector2& pos, uint64_t amount);
+
+    void wallCollsion();
+    void particleCollison();
 };

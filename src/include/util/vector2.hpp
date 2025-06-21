@@ -19,6 +19,8 @@ struct vector2 {
 
     vector2& operator+=(const vector2& other);
 
+    vector2& operator-=(const vector2& other);
+
 	vector2& operator*=(const type scalar);
 
 	vector2& operator/=(const type scalar);
@@ -29,3 +31,5 @@ struct vector2 {
 
     void empty();
 };
+
+std::ostream& operator<<(std::ostream& os, const vector2& vec);

@@ -26,11 +26,11 @@ int initialiseGLFW() {
  */
 
 int print(std::vector<Particle> particles) {
-	std::cout << "Particle Count: " << particles.size() << "\n";
+	// std::cout << "Particle Count: " << particles.size() << "\n";
 	// for (Particle particle: particles) {
 	//     particle.printParticle(); // Really slow
 	// }
-	std::cout << std::endl;
+	// std::cout << std::endl;
 	return 0;
 }
 
@@ -41,7 +41,7 @@ int startSimulation() {
 		return ret;
 	}
 
-	Simulation test = Simulation(144, 1);
+	Simulation test = Simulation(144, 1000, 1000, 1, true);
 	test.loop(print);
 	return 0;
 }

@@ -2,7 +2,7 @@
 
 
 vector2 vector2::operator+(const vector2& other) const{
-    return {x + other.x, y + other.y};
+    return {this->x + other.x, this->y + other.y};
 }
 
 vector2 vector2::operator*(type scalar) const {
@@ -23,6 +23,12 @@ vector2& vector2::operator+=(const vector2& other) {
     return *this;
 }
 
+vector2& vector2::operator-=(const vector2& other) {
+    x -= other.x;
+    y -= other.y;
+    return *this;
+}
+
 vector2& vector2::operator*=(const type scalar) {
     x *= scalar;
     y *= scalar;
@@ -37,6 +43,11 @@ vector2& vector2::operator/=(const type scalar) {
 
 vector2 vector2::operator-() const {
     return {-x, -y};
+}
+
+std::ostream& operator<<(std::ostream &os, const vector2 &vec) {
+	os << "(x: " << vec.x << ", y: " << vec.y << ")";
+    return os;
 }
 
 bool vector2::isValid() const {
