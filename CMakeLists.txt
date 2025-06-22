@@ -1,34 +1,61 @@
-cmake_minimum_required(VERSION 3.12) # Increased for FetchContent, modern CMake features
+cmake_minimum_required(VERSION 3.18) # Keep 3.18+ for better CUDA features
 
-project(Simulation VERSION 0.1 LANGUAGES C CXX)
+# --- Policy to silence FindCUDA warning ---
+# CMP0146 indicates that FindCUDA is deprecated.
+# Setting this policy to NEW tells CMake you're aware and proceeding with newer practices.
+cmake_policy(SET CMP0146 NEW)
+
+# --- Project Definition ---
+# Add CUDA as a required language - this is still the modern way to enable .cu compilation
+project(Simulation VERSION 0.1 LANGUAGES C CXX CUDA)
+
+# --- Find CUDA Toolkit (Modern Way) ---
+# Use the modern package name 'CUDAToolkit' instead of the old 'CUDA'
+find_package(CUDAToolkit REQUIRED)
+message(STATUS "Found CUDA toolkit.")
+# The modern find_package doesn't typically expose CUDA_TOOLKIT_ROOT_DIR directly
+# message(STATUS "  CUDA toolkit root not directly exposed by modern find_package(CUDAToolkit)")
+message(STATUS "  CUDA compiler ID: ${CMAKE_CUDA_COMPILER_ID}") # This is set by the project command
+
 
 # --- Project Options (can be changed by user e.g. with cmake-gui or -D) ---
 option(SIM_USE_FETCHCONTENT_FOR_GLFW "Download GLFW using FetchContent instead of using a local copy" ON)
 option(SIM_GLFW_STATIC_LIB "Build GLFW as a static library" ON) # Default to static for GLFW
 
+# Option for CUDA architecture(s)
+# You should set this based on your target GPU(s).
+# This property is automatically handled by the CUDA language support and find_package(CUDAToolkit).
+# The 'native' option attempts to detect the architecture of the build machine's GPU.
+if(NOT CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES "native" CACHE STRING "CUDA architectures to build for (e.g., 75;86 or native)")
+endif()
+message(STATUS "Building for CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
+
+
 # --- C++ Standard ---
-# Enforce C++17 or newer.
-# This sets the CMAKE_CXX_STANDARD property on all targets created later.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_EXTENSIONS OFF) # Prefer not to use compiler-specific extensions like -std=gnu++17
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# --- Dependencies ---
+# You can optionally set the CUDA standard too (requires CMake 3.18+)
+# set(CMAKE_CUDA_STANDARD 17)
+# set(CMAKE_CUDA_STANDARD_REQUIRED True)
 
-# GLFW:
-# Option 1: Using FetchContent (recommended for self-contained projects)
+
+# --- Dependencies (GLFW) ---
+# (This section remains the same as in your previous working CMakeLists.txt)
+
 if(SIM_USE_FETCHCONTENT_FOR_GLFW)
     include(FetchContent)
     message(STATUS "Using FetchContent to manage GLFW.")
 
-    # Set GLFW build options BEFORE FetchContent_MakeAvailable
     set(GLFW_BUILD_EXAMPLES OFF)
     set(GLFW_BUILD_TESTS OFF)
     set(GLFW_BUILD_DOCS OFF)
     set(GLFW_INSTALL OFF)
     if(SIM_GLFW_STATIC_LIB)
-        set(BUILD_SHARED_LIBS OFF) # Affects GLFW build if it checks this
-        set(GLFW_BUILD_SHARED OFF) # More specific to GLFW if it uses this var
+        set(BUILD_SHARED_LIBS OFF)
+        set(GLFW_BUILD_SHARED OFF)
     else()
         set(BUILD_SHARED_LIBS ON)
         set(GLFW_BUILD_SHARED ON)
@@ -37,38 +64,23 @@ if(SIM_USE_FETCHCONTENT_FOR_GLFW)
     FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG        3.4 # Or latest stable tag, or specific commit
-                          # Check https://github.com/glfw/glfw/releases for tags
-        # For local development if you have GLFW source already:
-        # SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/.dependencies/glfw-3.4 # Uncomment if you prefer local source with FetchContent
+        GIT_TAG        3.4
     )
     FetchContent_MakeAvailable(glfw)
 
-    # Restore BUILD_SHARED_LIBS if it was changed, so it doesn't affect other potential libraries
-    # unless that's the desired global behavior. For an executable, this is less critical.
-    # For this project, we assume we want our main executable to link statically to GLFW.
-    # If you had other libraries in your project, you might want to reset BUILD_SHARED_LIBS here.
-
 else()
-    # Option 2: Using add_subdirectory (as in your original file)
-    # Assumes GLFW source is in .dependencies/glfw-3.4
     message(STATUS "Using local GLFW from .dependencies/glfw-3.4.")
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.dependencies/glfw-3.4/CMakeLists.txt")
         message(FATAL_ERROR "GLFW source not found in .dependencies/glfw-3.4/. "
                             "Please clone/place it there or enable SIM_USE_FETCHCONTENT_FOR_GLFW.")
     endif()
 
-    # Set GLFW build options BEFORE add_subdirectory
-    # Using CACHE ... FORCE is strong; usually setting them as normal variables is enough
-    # if the subproject checks them before defining its own options.
     set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build GLFW examples" FORCE)
     set(GLFW_BUILD_TESTS OFF CACHE BOOL "Build GLFW tests" FORCE)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build GLFW documentation" FORCE)
-    set(GLFW_INSTALL OFF CACHE BOOL "Install GLFW" FORCE) # Don't install GLFW when building our project
+    set(GLFW_INSTALL OFF CACHE BOOL "Install GLFW" FORCE)
     if(SIM_GLFW_STATIC_LIB)
-        # This tells GLFW (and potentially other subprojects) to build as static libs
         set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries globally" FORCE)
-        # Some projects might use a specific variable like this:
         set(GLFW_BUILD_SHARED OFF CACHE BOOL "Build GLFW as a shared library" FORCE)
     else()
         set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries globally" FORCE)
@@ -80,168 +92,139 @@ endif()
 
 
 # --- Source Files ---
-# GLOB_RECURSE is convenient but be aware: if you add/remove files,
-# you might need to re-run CMake manually (or touch CMakeLists.txt)
-# unless CONFIGURE_DEPENDS is very reliable for your CMake version/generator.
-# For more robust builds, especially in larger projects or CI, list files explicitly.
+# Include .cu files in the glob
 file(GLOB_RECURSE SRC_FILES
-    CONFIGURE_DEPENDS # Ensures CMake re-runs if files matching the glob change
+    CONFIGURE_DEPENDS
     "src/*.cpp"
-    "src/*.c" # If you have any .c files in src/
+    "src/*.c"
+    "src/*.cu"  # Include CUDA source files
 )
-# Example of explicit listing (more robust):
-# set(SRC_FILES
-#     src/main.cpp
-#     src/engine/renderer.cpp
-#     # ... other files
-# )
 
-# Add glad.c (assuming it's pre-generated and in .dependencies/)
-# If glad.h is also there, its include path will be handled below.
+# Add glad.c
 set(GLAD_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/.dependencies/glad.c")
 if(NOT EXISTS "${GLAD_SOURCE}")
     message(FATAL_ERROR "glad.c not found at ${GLAD_SOURCE}. Please generate and place it there.")
 endif()
 
+# --- Create Executable ---
+# Use standard add_executable. CMake will use nvcc for .cu files
 add_executable(${PROJECT_NAME}
     ${GLAD_SOURCE}
     ${SRC_FILES}
 )
 
-# --- Target-specific C++ Standard (alternative to global set) ---
-# If you prefer setting C++ standard per target:
+# --- Target-specific C++/CUDA Standard (alternative) ---
 # target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+# target_compile_features(${PROJECT_NAME} PRIVATE cuda_std_17) # Requires CMake 3.18+
 
 # --- Include Directories ---
-target_include_directories(${PROJECT_NAME} PUBLIC # Or PRIVATE if headers are not needed by users of this target (if it were a lib)
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/include"  # Your project's public headers
-    "${CMAKE_CURRENT_SOURCE_DIR}/.dependencies" # For glad.h (if it's directly in .dependencies)
+target_include_directories(${PROJECT_NAME} PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/.dependencies" # For glad.h if it's directly in .dependencies
     # If glad headers are in a subfolder, e.g., .dependencies/glad/include:
     # "${CMAKE_CURRENT_SOURCE_DIR}/.dependencies/glad/include"
 )
-# GLFW include directories are automatically added by `target_link_libraries`
-# because a well-behaved CMake library (like GLFW) uses `target_include_directories`
-# with INTERFACE or PUBLIC scope.
+# GLFW include directories are handled automatically by target_link_libraries(glfw)
+
 
 # --- Link Libraries ---
-# PRIVATE: glfw is a build dependency, not propagated to link interface of ${PROJECT_NAME} (if it were a library)
+# Use keyword signature for ALL links.
+# Link against GLFW
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
+# Link against the CUDA Toolkit (includes cudart). This uses the modern interface target.
+# Place this after linking other libraries that might depend on CUDA runtime symbols if order matters.
+target_link_libraries(${PROJECT_NAME} PRIVATE CUDAToolkit::Toolkit)
+
+
 # --- Compile Options ---
-# Common options for all compilers and configurations
+# Common options for C++/C/CUDA host code
 target_compile_options(${PROJECT_NAME} PRIVATE
-    # Add definitions that should apply to all builds, e.g. -DMY_MACRO
+    -Wall
 )
 
 # Common warning flags (most compilers understand these or ignore them)
-target_compile_options(${PROJECT_NAME} PRIVATE
-    -Wall
-              # If you really want errors: -pedantic-errors
-)
+# Example:
+# if(NOT MSVC)
+#     target_compile_options(${PROJECT_NAME} PRIVATE -Wextra -pedantic)
+# endif()
+
 
 # Configuration-specific options
-target_compile_options(${PROJECT_NAME} PRIVATE
-    $<$<CONFIG:Debug>:-g>                     # Debug: add debug symbols
-    $<$<CONFIG:Release>:-O3 -DNDEBUG>         # Release: optimize, define NDEBUG
-    $<$<CONFIG:RelWithDebInfo>:-O2 -g -DNDEBUG> # Release with Debug Info
-    $<$<CONFIG:MinSizeRel>:-Os -DNDEBUG>      # Minimum Size Release
-)
+# Example:
+# target_compile_options(${PROJECT_NAME} PRIVATE
+#   $<$<CONFIG:Debug>:-g> # Debug symbols for Debug configuration
+#   $<$<CONFIG:Release>:-O3> # Optimization level 3 for Release
+# )
+
 
 # Compiler-specific and OS-specific warning flags
-if(MSVC) # Microsoft Visual C++
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        /W4                # Warning level 4 (high)
-        /WX                # Treat warnings as errors
-        /permissive-       # Enforce standard conformance more strictly
-        /wd4201            # Disable: nonstandard extension used: nameless struct/union (common in Windows headers)
-        # Add other MSVC specific flags or /wdXXXX to disable specific warnings
-    )
-else() # GCC, Clang, and other non-MSVC compilers
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        -pedantic-errors # -pedantic-errors is very strict, -pedantic is often a good balance
-        -Wextra            # Even more warnings
-        -Werror            # Treat all enabled warnings as errors (can be aggressive)
-        -Wconversion       # Warn on implicit conversions that may alter a value (can be noisy)
-        -Wsign-conversion  # Warn for implicit sign conversions (can be noisy)
-        # -Wshadow           # Warn when a local variable shadows another local variable, parameter or global
-        -Wno-unused-parameter # Example: If you often have unused parameters you want to ignore
-        -fPIC              # Required for shared libraries on some platforms, good practice for executables too
-                           # if they might be part of position-independent code scenarios.
-                           # For executables, it's often not strictly necessary but doesn't hurt.
-    )
+# Example:
+# if(MSVC)
+#   target_compile_options(${PROJECT_NAME} PRIVATE /W4) # Warning level 4 for MSVC
+# elseif(GNU OR Clang)
+#   target_compile_options(${PROJECT_NAME} PRIVATE -Wshadow -Wformat=2) # Add more warnings for GCC/Clang
+# endif()
 
-    # Specific to GCC
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        target_compile_options(${PROJECT_NAME} PRIVATE
-            # Add GCC-specific flags here if needed
-            # e.g. -Wduplicated-branches
-        )
-    endif()
 
-    # Specific to Clang
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        target_compile_options(${PROJECT_NAME} PRIVATE
-            # Add Clang-specific flags here if needed
-            # e.g. -Wimplicit-fallthrough
-        )
-    endif()
-endif()
+# --- CUDA Specific Compile Options ---
+# These options are passed specifically to the NVCC compiler.
+# CMAKE_CUDA_ARCHITECTURES property handles the architecture flags (-gencode/-arch).
+# Add other specific NVCC flags here if needed.
+# target_compile_options(${PROJECT_NAME} PRIVATE
+#    --compiler-options "-Wno-unused-parameter" # Example: pass option to host compiler
+#    -Wno-deprecated-gpu-targets # Example: disable NVCC warning
+# )
+
+
+# Ensure host compiler flags are propagated to NVCC's host pass (usually ON by default, but explicit is clear)
+set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_PROPAGATE_HOST_FLAGS ON)
 
 
 # --- Source File Specific Properties ---
-# Silence warnings for glad.c (which is generated C code)
-# This is important as generated code might not adhere to your strict warning levels.
+# Silence warnings for glad.c
+# Note: This overrides other compile options for this specific file.
 if(MSVC)
-    set_source_files_properties(${GLAD_SOURCE} PROPERTIES COMPILE_FLAGS "/w") # Turn off all warnings for glad.c with MSVC
+    set_source_files_properties(${GLAD_SOURCE} PROPERTIES COMPILE_FLAGS "/w")
 else()
-    set_source_files_properties(${GLAD_SOURCE} PROPERTIES COMPILE_FLAGS "-w") # Turn off all warnings for glad.c with GCC/Clang
+    set_source_files_properties(${GLAD_SOURCE} PROPERTIES COMPILE_FLAGS "-w")
 endif()
 
 
-# --- Output Directories (Optional but good practice for organization) ---
-# This helps keep your build directory tidy, especially with multi-config generators (like VS)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE}")
-
-# For single-config generators, CMAKE_BUILD_TYPE might be empty in the configure step.
-# A more robust way for output directories:
+# --- Output Directories (Optional) ---
+# Set output directories based on build configuration
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib")
-if(CMAKE_CONFIGURATION_TYPES) # Multi-config generator (e.g. Visual Studio, Xcode)
+if(CMAKE_CONFIGURATION_TYPES) # Multi-config generator (like Visual Studio)
     foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
         string(TOUPPER ${CONFIG} CONFIG_UPPER)
         set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${EXECUTABLE_OUTPUT_PATH}/${CONFIG}")
         set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${LIBRARY_OUTPUT_PATH}/${CONFIG}")
         set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG_UPPER} "${LIBRARY_OUTPUT_PATH}/${CONFIG}")
     endforeach()
-else() # Single-config generator (e.g. Makefiles, Ninja)
+else() # Single-config generator (like Makefile, Ninja)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${EXECUTABLE_OUTPUT_PATH}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_OUTPUT_PATH}")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LIBRARY_OUTPUT_PATH}")
 endif()
 
 
-# --- Installation (Optional, if you plan to install your project) ---
+# --- Installation (Optional) ---
 # install(TARGETS ${PROJECT_NAME}
 #     RUNTIME DESTINATION bin
 #     LIBRARY DESTINATION lib
-#     ARCHIVE DESTINATION lib/static
+#     ARCHIVE DESTINATION lib
 # )
-# install(FILES src/include/myheader.h DESTINATION include) # Example
 
 # --- Packaging with CPack (Optional) ---
-# include(InstallRequiredSystemLibraries) # If you need to bundle system libs
-# set(CPACK_GENERATOR "TGZ") # Or ZIP, RPM, DEB, NSIS etc.
-# set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
-# set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-# # ... other CPack settings
 # include(CPack)
+
 
 message(STATUS "CMake configuration finished for ${PROJECT_NAME}.")
 message(STATUS "  Source directory: ${CMAKE_SOURCE_DIR}")
 message(STATUS "  Binary directory: ${CMAKE_BINARY_DIR}")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE} (if single-config generator)")
 message(STATUS "  C++ Compiler: ${CMAKE_CXX_COMPILER_ID} (${CMAKE_CXX_COMPILER})")
+message(STATUS "  CUDA Compiler: ${CMAKE_CUDA_COMPILER_ID} (${CMAKE_CUDA_COMPILER})")
 message(STATUS "  Using C++ Standard: ${CMAKE_CXX_STANDARD}")
-
+message(STATUS "  Building for CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
