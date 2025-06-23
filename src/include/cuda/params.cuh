@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util.cuh"
+#include "cuda/util.cuh"
 
 struct SimulationParams {
     // Core SPH parameters
@@ -13,14 +13,10 @@ struct SimulationParams {
     float surfaceTensionThreshold;   // Threshold for color field laplacian to apply surface tension
 
     // Simulation control & environment
-    float gravity_x;
-    float gravity_y;
-    float gravity_z;
+    float4 gravity;
 
     // Domain boundaries (Axis-Aligned Bounding Box - AABB)
-    float min_x, max_x;
-    float min_y, max_y;
-    float min_z, max_z;
+    float4 min, max;
     float boundaryDamping;      // Damping coefficient for collisions with boundaries (e.g., 0.6 means 60% velocity retained perpendicular to wall)
     float wallStiffness;        // Stiffness for boundary repulsion penalty force
 
@@ -53,13 +49,13 @@ struct SimulationParams {
 
 // --- Device Functions ---
 
-SimulationParams* SimulationParams_Device_Init();
+SimulationParams* SimulationParams_Device_Create();
 void SimulationParams_Device_Free(SimulationParams* ps);
 void SimulationParams_Device_CopyToHost(SimulationParams* ps_device, SimulationParams* ps_host);
 
 // --- Host Functions ---
 
-SimulationParams* SimulationParams_Host_Init();
+SimulationParams* SimulationParams_Host_Create();
 void SimulationParams_Host_Free(SimulationParams* ps);
 void SimulationParams_Host_CopyToDevice(SimulationParams* ps_host, SimulationParams* ps_device);
 

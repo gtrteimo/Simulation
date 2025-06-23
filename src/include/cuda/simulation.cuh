@@ -1,9 +1,10 @@
 #pragma once
 
-#include "util.cuh"
-#include "params.cuh"
-#include "particles.cuh"
-#include "grid.cuh"
+#include "cuda/util.cuh"
+#include "cuda/params.cuh"
+#include "cuda/particles.cuh"
+#include "cuda/grid.cuh"
+#include "cuda/util.cuh"
 
 struct Simulation {
     ParticleSystem* device_ps = nullptr;
@@ -15,7 +16,7 @@ struct Simulation {
     GridData* host_grid = nullptr;
 };
 
-Simulation* Simulation_Init(int numParticles);
+Simulation* Simulation_Create(int numParticles);
 
 void Simulation_Free(Simulation* sim);
 
