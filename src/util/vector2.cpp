@@ -2,11 +2,19 @@
 
 
 vector2 vector2::operator+(const vector2& other) const{
-    return {this->x + other.x, this->y + other.y};
+    return {x + other.x, y + other.y};
+}
+
+vector2 vector2::operator-(const vector2& other) const {
+    return {x - other.x, y + other.y};
 }
 
 vector2 vector2::operator*(type scalar) const {
     return {x * scalar, y * scalar};
+}
+
+type vector2::dot(const vector2& other) const {
+    return x * other.x + y * other.y;
 }
 
 vector2 vector2::operator/(const type scalar) const {
@@ -59,6 +67,13 @@ bool vector2::isValid() const {
         ret = false;
     }
     return ret;
+}
+
+bool vector2::isEmpty() {
+    if ( !x && !y) {
+        return true;
+    }
+    return false;
 }
 
 void vector2::empty() {

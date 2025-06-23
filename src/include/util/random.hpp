@@ -11,4 +11,5 @@ vector3 randPer3();
 colourRGB randColour();
 colourRGB randDarkColour();
 colourRGB randLightColour();
+colourRGB randSingleColour();
 

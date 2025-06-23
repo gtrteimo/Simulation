@@ -47,7 +47,7 @@ vector2 normalize(GLFWwindow *const window, const vector2 &vec) {
 	return {-1, -1};
 }
 
-int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
+int Simulation::loop(std::function<int(std::vector<Particle>&)> function) {
 
 	// Duration of one frame in nanoseconds
 	const std::chrono::nanoseconds frameTime(static_cast<long long>(1e9 / fps));
@@ -106,12 +106,13 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
 		if (int ret = (function(particles)) < 0) {
 			return ret;
 		}
-
-        // particles.at(0).printForce();
-
         
 
+
         updateAccVel();
+
+        wallCollision();
+
 		updatePos();
 
 		draw.clearScreen({0, 0, 0});
@@ -134,8 +135,8 @@ int Simulation::loop(std::function<int(std::vector<Particle>)> function) {
 
 		auto duration2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end2 - start);
 
-		// double currentFps = static_cast<double>(1e9) / static_cast<double>(duration2.count());
-		// std::cout << "FPS: " << static_cast<int>(currentFps) << std::endl;
+		double currentFps = static_cast<double>(1e9) / static_cast<double>(duration2.count());
+		std::cout << "FPS: " << static_cast<int>(currentFps) << std::endl;
 	}
 	return 0;
 }
@@ -194,7 +195,6 @@ void Simulation::inputKeyboardTap(GLFWwindow* window, int key, [[maybe_unused]] 
 void Simulation::addForce(const vector2 &pos) {
 	for (Particle& particle : particles) {
 		particle.applyForce(pos);
-        particle.printForce();
 	}
 }
 void Simulation::removeForce(const vector2 &pos) {
@@ -204,6 +204,28 @@ void Simulation::removeForce(const vector2 &pos) {
 }
 void Simulation::addParticle(const vector2 &pos, uint64_t amount) {
     for (uint64_t i = 0; i < amount; i++) {
-	    particles.push_back(Particle(1.0, 0.05, pos));
+	    particles.push_back(Particle(1.0, 0.01, pos));
     }
+}
+
+int Simulation::wallCollision() {
+    if (fps == 0) {
+		return -1;
+	}
+	type dt = static_cast<type>(1.0) / static_cast<type>(fps);
+    for (Particle& particle : particles) {
+		particle.wallCollision(dt);
+	}
+    return 0;
+}
+
+int Simulation::particelCollision() {
+    if (fps == 0) {
+		return -1;
+	}
+	type dt = static_cast<type>(1.0) / static_cast<type>(fps);
+    for (Particle& particle : particles) {
+		particle.particelCollision(dt, particles);
+	}
+    return 0;
 }

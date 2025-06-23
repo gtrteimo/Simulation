@@ -6,13 +6,14 @@ void Frame::framebuffer_size_callback(GLFWwindow* cb_window, int width, int heig
     glViewport(0, 0, width, height);
 }
 
-Frame::Frame(uint16_t width, uint16_t height, const char* title)
-    : window(nullptr), frameWidth(width), frameHeight(height) {
+Frame::Frame(uint16_t width, uint16_t height, const char* title) : window(nullptr), frameWidth(width), frameHeight(height) {
 
     window = glfwCreateWindow(frameWidth, frameHeight, title, NULL, NULL);
     if (!window) {
         throw std::runtime_error("Failed to create GLFW window");
     }
+
+    glfwSetWindowPos(window, 920, 28);
     glfwMakeContextCurrent(window);
 
     static bool glad_initialized = false;

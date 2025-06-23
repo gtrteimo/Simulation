@@ -7,18 +7,20 @@
 
 #include <iostream>
 
+const static type FRICTION_MULTI = 0.80;
+
 class Particle {
   private:
     const type mass;
     const type size;
     vector2 position;
     vector2 velocity;
-    vector2 acceleration;
-    vector2 force;
+    vector2 acceleration = {0, 0};
+    vector2 force = {0, 0};
     colourRGB colour;
 
   public:
-    Particle(type mass = 1.0, type size = 0.05, vector2 position = {0, 0}, vector2 velocity = {0, 0}, colourRGB colour = randLightColour());
+    Particle(type mass = 1.0, type size = 0.01, vector2 position = {0, 0}, vector2 velocity = {0, 0}, colourRGB colour = randSingleColour());
 
     ~Particle();
 
@@ -33,7 +35,8 @@ class Particle {
 
     void printParticle() const;
 
-    void printForce() {
-      std::cout << force << std::endl;
-    }
+    bool wallCollision(type dt);
+    bool particelCollision(type dt, std::vector<Particle>& particles);
+  private:
+    vector2 intersect(type dt, const Particle& particel);
 };

@@ -13,7 +13,11 @@ struct vector2 {
 
     vector2 operator+(const vector2& other) const;
 
+    vector2 operator-(const vector2& other) const;
+
     vector2 operator*(const type scalar) const;
+
+    type dot(const vector2& other) const;
 
     vector2 operator/(const type scalar) const;
 
@@ -28,6 +32,8 @@ struct vector2 {
     vector2 operator-() const;
 
     bool isValid() const;
+
+    bool isEmpty();
 
     void empty();
 };

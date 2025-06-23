@@ -34,4 +34,29 @@ colourRGB randLightColour() {
     return {r, g, b};
 }
 
+colourRGB randSingleColour() {
+    uint8_t primary_component = randByte() / 3 + 170;
+    
+    uint8_t secondary_low = randByte() / 3;
+    uint8_t secondary_mid = randByte() / 2 + 64;
+
+
+    switch (randByte() % 10) {
+        case 0: return {primary_component, secondary_low, secondary_low};
+        case 1: return {secondary_low, primary_component, secondary_low};
+        case 2: return {secondary_low, secondary_low, primary_component};
+        
+        case 3: return {primary_component, primary_component, secondary_low};
+        case 4: return {primary_component, secondary_low, primary_component};
+        case 5: return {secondary_low, primary_component, primary_component};
+
+        case 6: return {primary_component, secondary_mid, secondary_low};
+        case 7: return {primary_component, secondary_low, secondary_mid};
+        case 8: return {secondary_mid, primary_component, secondary_low};
+        case 9: return {secondary_low, secondary_mid, primary_component};
+        
+        default: return {255, 255, 255}; //Not possible but still
+    }
+}
+
 

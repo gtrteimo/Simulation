@@ -25,11 +25,11 @@ int initialiseGLFW() {
  * It it just a simple Example to demonstrate how to start the simulation.
  */
 
-int print(std::vector<Particle> particles) {
+int print(std::vector<Particle>& particles) {
 	// std::cout << "Particle Count: " << particles.size() << "\n";
-	// for (Particle particle: particles) {
-	//     particle.printParticle(); // Really slow
-	// }
+	for (Particle particle: particles) {
+	    particle.printParticle(); // Really slow
+	}
 	// std::cout << std::endl;
 	return 0;
 }
