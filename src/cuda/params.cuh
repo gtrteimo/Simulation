@@ -1,31 +1,8 @@
 #pragma once
 
 #include "cuda/util.cuh"
+#include "types/simulationTypes.h"
 #include <math.h>
-
-struct SimulationParams {
-    // Core SPH parameters
-    float smoothingRadius;      // h: Radius of influence for kernel computations
-    float gasConstantK;         // k_gas: Stiffness for the equation of state (e.g., P = k * (rho - rho_0))
-    float restDensity;          // rho_0: Target density of the fluid
-    float viscosityCoefficient; // mu: Dynamic viscosity coefficient
-    float surfaceTensionCoefficient; // sigma: Coefficient for surface tension force
-    float surfaceTensionThreshold;   // Threshold for color field laplacian to apply surface tension
-
-    // Simulation control & environment
-    float4 gravity;
-
-    // Domain boundaries (Axis-Aligned Bounding Box - AABB)
-    float4 min, max;
-    float boundaryDamping;      // Damping coefficient for collisions with boundaries (e.g., 0.6 means 60% velocity retained perpendicular to wall)
-    float wallStiffness;        // Stiffness for boundary repulsion penalty force
-
-    // Kernel precomputed values (derived from smoothingRadius, crucial for SPH calculations)
-    float smoothingRadiusSq;
-    float poly6KernelCoeff;
-    float spikyKernelGradientCoeff;
-    float viscosityKernelLaplacianCoeff;
-};
 
 const SimulationParams SimulationParams_Default = {
     0.04f, // smoothingRadius (4cm)

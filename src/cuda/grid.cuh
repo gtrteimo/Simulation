@@ -1,22 +1,7 @@
 #pragma once
 
-#include "cuda/params.cuh"    // For SimulationParams and domain bounds
-#include "cuda/particles.cuh" // For ParticleSystem (mainly numParticles)
+#include "types/simulationTypes.h" // For GridData, ParticleSystem, SimulationParams
 #include "cuda/util.cuh"      // For CHECK_CUDA_ERROR
-#include <cuda_runtime.h>
-
-struct GridData {
-    unsigned int* particle_hashes;
-    unsigned int* particle_indices;
-    unsigned int* cell_starts;
-    unsigned int* cell_ends;
-
-    float gridCellSize;
-    float invGridCellSize;
-    float4 domainMin;
-    int4 gridDimensions;
-    unsigned int numGridCells; // WARNING: Can overflow for large 4D grids
-};
 
 // --- Host Functions ---
 

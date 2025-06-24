@@ -91,7 +91,7 @@ add_executable(${PROJECT_NAME}
 
 # --- Include Directories ---
 target_include_directories(${PROJECT_NAME} PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/"
     "${CMAKE_CURRENT_SOURCE_DIR}/.dependencies" # For glad.h
 )
 

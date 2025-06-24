@@ -1,4 +1,5 @@
 #include "cuda/particles.cuh"
+#include "cuda/util.cuh"
 #include <stdlib.h>
 
 // --- Utility Functions ---

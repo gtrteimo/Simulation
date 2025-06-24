@@ -1,18 +1,6 @@
 #pragma once
 
-#include "cuda/util.cuh"
-
-struct ParticleSystem {
-	float4 *pos;
-	float4 *vel;
-	float4 *force;
-	float *mass;
-	float *density;
-	float *pressure;
-	float4 *normal;
-	float *color_laplacian;
-	unsigned int numParticles;
-};
+#include "types/simulationTypes.h"
 
 // --- Host Memory Functions ---
 

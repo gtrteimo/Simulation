@@ -2,11 +2,11 @@
 
 
 int main(void) {
-	cudaError_t cudaStatus = cudaSetDevice(0); // Use GPU 0
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaSetDevice failed! Do you have a CUDA-enabled GPU?\n");
-        return 1;
-    }
+	cudaError_t cudaStatus = cudaSetDevice(0);
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "cudaInitDevice failed! Do you have a CUDA-enabled GPU?\n");
+		return 1;
+	}
 
 	// --- Test params ---
 	printf("Starting params Test\n");

@@ -22,23 +22,23 @@ void Simulation_Free(Simulation *sim);
 
 // Function to synchronize
 
-void Simulation_Host_Sync_AllToDevice(Simulation *sim);
-void Simulation_Host_Sync_ParticlesToDevice(Simulation *sim);
-void Simulation_Host_Sync_ParametersToDevice(Simulation *sim);
-void Simulation_Host_Sync_GridToDevice(Simulation *sim);
+void Simulation_CopyAll_HostToDevice(Simulation *sim);
+void Simulation_CopyParticles_HostToDevice(Simulation *sim);
+void Simulation_CopyParameters_HostToDevice(Simulation *sim);
+void Simulation_CopyGrid_HostToDevice(Simulation *sim);
 
-void Simulation_Device_Sync_AllToHost(Simulation *sim);
-void Simulation_Device_Sync_ParticlesToHost(Simulation *sim);
-void Simulation_Device_Sync_ParametersToHost(Simulation *sim);
-void Simulation_Device_Sync_GridToHost(Simulation *sim);
+void Simulation_CopyAll_DeviceToHost(Simulation *sim);
+void Simulation_CopyParticles_DeviceToHost(Simulation *sim);
+void Simulation_CopyParameters_DeviceToHost(Simulation *sim);
+void Simulation_CopyGrid_DeviceToHost(Simulation *sim);
 
-// --- Simulation Device control functions ---
+// --- Simulation control functions ---
 
 // Main function to advance the SPH simulation by one time step (dt).
 // This function orchestrates calls to various CUDA kernels.
-// - sim: Contains device particle data (ps_device), simulation parameters, and grid data.
+// - sim: Contains all necessary data, but only device data is used.
 // - dt: The time step for this simulation update.
-void Simulation_Device_Step(
+void Simulation_Step(
     Simulation *sim,
     float dt);
 
@@ -48,7 +48,7 @@ void Simulation_Device_Step(
 // 2. Sorting particles by hash (host-side library call like thrust::sort_by_key).
 // 3. Finding cell bounds (Grid_FindCellBoundsKernel).
 // Modifies grid data within sim->grid_data_device.
-void Simulation_Device_BuildGrid(Simulation *sim);
+void Simulation_BuildGrid(Simulation *sim);
 
 // --- Simulation Kernel ---
 
