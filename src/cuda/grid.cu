@@ -2,6 +2,7 @@
 #include "cuda/params.cuh"
 #include "cuda/particles.cuh"
 #include "cuda/util.cuh"
+#include "types/simulationTypes.h"
 #include <cmath>
 #include <algorithm> // For std::max
 #include <cstdio>    // For fprintf, stderr

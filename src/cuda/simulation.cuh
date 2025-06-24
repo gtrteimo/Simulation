@@ -5,6 +5,7 @@
 #include "cuda/particles.cuh"
 #include "cuda/grid.cuh"
 #include "cuda/util.cuh"
+#include "types/simulationTypes.h"
 
 struct Simulation {
 	ParticleSystem *device_ps = nullptr;
@@ -47,7 +48,7 @@ void Simulation_Step(
 // 1. Calculating hashes (Grid_CalculateHashesKernel).
 // 2. Sorting particles by hash (host-side library call like thrust::sort_by_key).
 // 3. Finding cell bounds (Grid_FindCellBoundsKernel).
-// Modifies grid data within sim->grid_data_device.
+// Modifies grid data within sim->device_grid.
 void Simulation_BuildGrid(Simulation *sim);
 
 // --- Simulation Kernel ---
