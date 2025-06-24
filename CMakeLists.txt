@@ -19,7 +19,7 @@ option(SIM_GLFW_STATIC_LIB "Build GLFW as a static library" ON)
 # Note: Build log indicates compilation for 52 despite this setting.
 # Ensure CMake cache is cleared if you intend to target 80;86;89.
 if(NOT CMAKE_CUDA_ARCHITECTURES)
-    set(CMAKE_CUDA_ARCHITECTURES "80;86;89" CACHE STRING "CUDA architectures to build for (e.g., 75;86 or native)")
+    set(CMAKE_CUDA_ARCHITECTURES "native" CACHE STRING "CUDA architectures to build for (e.g., 75;86 or native)")
 endif()
 message(STATUS "  Building for CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}") # Use this to verify the setting
 
