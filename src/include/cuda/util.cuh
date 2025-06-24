@@ -1,9 +1,8 @@
 #pragma once
 
+#include <cuda.h>
 #include <cuda_runtime.h>
-#include <device_launch_parameters.h>
 #include <stdio.h>
-#include <cstdlib>
 
 #define M_PI 3.14159265358979323846f
 

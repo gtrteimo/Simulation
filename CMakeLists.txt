@@ -16,10 +16,12 @@ option(SIM_USE_FETCHCONTENT_FOR_GLFW "Download GLFW using FetchContent instead o
 option(SIM_GLFW_STATIC_LIB "Build GLFW as a static library" ON)
 
 # Option for CUDA architecture(s)
+# Note: Build log indicates compilation for 52 despite this setting.
+# Ensure CMake cache is cleared if you intend to target 80;86;89.
 if(NOT CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES "80;86;89" CACHE STRING "CUDA architectures to build for (e.g., 75;86 or native)")
 endif()
-message(STATUS "Building for CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
+message(STATUS "  Building for CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}") # Use this to verify the setting
 
 # --- C++ Standard ---
 set(CMAKE_CXX_STANDARD 17)
@@ -27,8 +29,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set CUDA standard too
-# set(CMAKE_CUDA_STANDARD 17)
-# set(CMAKE_CUDA_STANDARD_REQUIRED True)
+set(CMAKE_CUDA_STANDARD 17) # Uncommented and set
+set(CMAKE_CUDA_STANDARD_REQUIRED True)
 
 # --- Dependencies (GLFW) ---
 if(SIM_USE_FETCHCONTENT_FOR_GLFW)
@@ -87,10 +89,6 @@ add_executable(${PROJECT_NAME}
     ${SRC_FILES}
 )
 
-# --- Target-specific C++/CUDA Standard (alternative) ---
-# target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-# target_compile_features(${PROJECT_NAME} PRIVATE cuda_std_17)
-
 # --- Include Directories ---
 target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/include"
@@ -102,18 +100,25 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE CUDA::cudart)
 
 # --- Compile Options ---
-# REMOVED: Compiler-specific warning flags like /Wall or -Wall
-
 # Configuration-specific options (Debug/Release)
 target_compile_options(${PROJECT_NAME} PRIVATE
-  $<$<CONFIG:Debug>:-g> # Debug symbols
-  $<$<CONFIG:Release>:-O3> # Optimization
+  $<$<CONFIG:Debug>:-g> # Debug symbols (applies to C, CXX, CUDA host)
+  $<$<CONFIG:Release>:-O3> # Optimization (applies to C, CXX, CUDA host)
 )
 
-# Ensure host compiler flags are propagated to NVCC's host pass
-set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_PROPAGATE_HOST_FLAGS ON)
+# --- IMPORTANT CHANGE 1: Disable host flag propagation ---
+# This prevents duplicate and malformed host compiler flags.
+# CMake and the VS generator will handle default host flags correctly.
+set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_PROPAGATE_HOST_FLAGS OFF) # Changed from ON
+
+# --- IMPORTANT CHANGE 2: Suppress deprecated GPU targets warning correctly ---
+# Add this flag specifically for the CUDA compilation step.
+target_compile_options(${PROJECT_NAME} PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:-Wno-deprecated-gpu-targets>
+)
 
 # --- Source File Specific Properties ---
+# Suppress warnings for the glad.c file
 if(MSVC)
     set_source_files_properties(${GLAD_SOURCE} PROPERTIES COMPILE_FLAGS "/w")
 else()
@@ -153,4 +158,5 @@ endif()
 message(STATUS "  C++ Compiler: ${CMAKE_CXX_COMPILER_ID} (${CMAKE_CXX_COMPILER})")
 message(STATUS "  CUDA Compiler: ${CMAKE_CUDA_COMPILER_ID} (${CMAKE_CUDA_COMPILER})")
 message(STATUS "  Using C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Using CUDA Standard: ${CMAKE_CUDA_STANDARD}") # Added message
 message(STATUS "  Building for CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")

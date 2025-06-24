@@ -181,8 +181,16 @@ __host__ void ParticleSystem_FreeOnDevice(ParticleSystem *ps_device) {
     }
 }
 
+// --- Device Accessor Functions ---
+
 __host__ void ParticleSystem_SetNumParticlesOnDevice(ParticleSystem *ps, int numParticles) {
     CHECK_CUDA_ERROR( cudaMemcpy(&ps->numParticles, &numParticles, sizeof(int), cudaMemcpyHostToDevice) );
+}
+
+__host__ unsigned int ParticleSystem_GetNumParticlesOnDevice(ParticleSystem *ps) {
+    unsigned int numParticles;
+    CHECK_CUDA_ERROR( cudaMemcpy(&numParticles, &ps->numParticles, sizeof(unsigned int), cudaMemcpyDeviceToHost) );
+    return numParticles;
 }
 
 // --- Copy Device to Host Functions ---

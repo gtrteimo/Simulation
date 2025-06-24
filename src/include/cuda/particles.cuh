@@ -19,6 +19,8 @@ struct ParticleSystem {
 __host__ ParticleSystem *ParticleSystem_CreateOnHost(int numParticles);
 __host__ void ParticleSystem_FreeOnHost(ParticleSystem *ps);
 
+// --- Copy Host to Device Functions ---
+
 __host__ void ParticleSystem_CopyAll_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
 __host__ void ParticleSystem_CopyPos_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
 __host__ void ParticleSystem_CopyVel_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
@@ -33,7 +35,13 @@ __host__ void ParticleSystem_CopyColorLaplacian_HostToDevice(ParticleSystem *ps_
 
 __host__ ParticleSystem *ParticleSystem_CreateOnDevice(int numParticles);
 __host__ void ParticleSystem_FreeOnDevice(ParticleSystem *ps);
+
+// --- Device Accessor Functions ---
+
 __host__ void ParticleSystem_SetNumParticlesOnDevice(ParticleSystem *ps, int numParticles);
+__host__ unsigned int ParticleSystem_GetNumParticlesOnDevice(ParticleSystem *ps);
+
+// --- Copy Device to Host Functions ---
 
 __host__ void ParticleSystem_CopyAll_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
 __host__ void ParticleSystem_CopyPos_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
