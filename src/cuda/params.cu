@@ -71,12 +71,17 @@ __host__ void SimulationParams_PrecomputeKernelCoefficients(SimulationParams &pa
 
 		params.smoothingRadiusSq = h2;
 		params.poly6KernelCoeff = 315.0f / (64.0f * PI_F * h9);
-		params.spikyKernelGradientCoeff = -45.0f / (PI_F * h6); // Negative sign often incorporated directly in force summation
+		params.spikyKernelGradientCoeff = -45.0f / (PI_F * h6);
 		params.viscosityKernelLaplacianCoeff = 45.0f / (PI_F * h6);
+		
+		// --- ADDED FOR SURFACE TENSION ---
+		// Gradient of Poly6 kernel
+		params.poly6KernelGradientCoeff = -945.0f / (32.0f * PI_F * h9);
+		// Laplacian of Poly6 kernel
+		params.poly6KernelLaplacianCoeff = -945.0f / (32.0f * PI_F * h9);
 	} else {
-		params.smoothingRadiusSq = 0.0f;
-		params.poly6KernelCoeff = 0.0f;
-		params.spikyKernelGradientCoeff = 0.0f;
-		params.viscosityKernelLaplacianCoeff = 0.0f;
+		// ... (zeroing out coefficients)
+		params.poly6KernelGradientCoeff = 0.0f;
+		params.poly6KernelLaplacianCoeff = 0.0f;
 	}
 }

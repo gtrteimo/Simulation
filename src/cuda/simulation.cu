@@ -35,16 +35,14 @@ __device__ inline float viscosity_kernel_laplacian(float dist, const SimulationP
 __device__ inline float4 poly6_kernel_gradient(float4 r, float r_sq, const SimulationParams *params) {
 	if (r_sq >= params->smoothingRadiusSq) return make_float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float term = params->smoothingRadiusSq - r_sq;
-	// Coefficient for gradient: -945 / (32 * pi * h^9)
-	float coeff = -945.0f / (32.0f * M_PI * powf(params->smoothingRadius, 9.0f)) * term * term;
+	float coeff = params->poly6KernelGradientCoeff * term * term;
 	return r * coeff;
 }
 
 // Poly6 Kernel Laplacian for surface tension force (color field laplacian)
 __device__ inline float poly6_kernel_laplacian(float r_sq, const SimulationParams *params) {
 	if (r_sq >= params->smoothingRadiusSq) return 0.0f;
-	// Coefficient for laplacian: -945 / (32 * pi * h^9)
-	float coeff = -945.0f / (32.0f * M_PI * powf(params->smoothingRadius, 9.0f));
+	float coeff = params->poly6KernelLaplacianCoeff;
 	return coeff * (params->smoothingRadiusSq - r_sq) * (3.0f * params->smoothingRadiusSq - 7.0f * r_sq);
 }
 
@@ -240,6 +238,7 @@ __global__ void Simulation_Kernel_ComputeInternalForces(Simulation *sim) {
 	float4 vel_i = ps->vel[i];
 	float pressure_i = ps->pressure[i];
 	float density_i = ps->density[i];
+	float mass_i = ps->mass[i];
 
 	float4 pressure_force = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 viscosity_force = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -269,15 +268,11 @@ __global__ void Simulation_Kernel_ComputeInternalForces(Simulation *sim) {
 
 						if (r_sq < params->smoothingRadiusSq) {
 							float dist = sqrtf(max(1.e-12f, r_sq));
-
 							float density_j = ps->density[j];
-							if (density_j < 1e-6f) continue;
+							if (density_j < 1e-6f || density_i < 1e-6f) continue;
 
-							// Pressure force (symmetrized)
-							float pressure_term = (pressure_i + ps->pressure[j]) / (2.0f * density_j);
-							pressure_force -= ps->mass[j] * pressure_term * spiky_kernel_gradient(r, dist, params);
-
-							// Viscosity force
+							float pressure_val = (pressure_i / (density_i * density_i)) + (ps->pressure[j] / (density_j * density_j));
+							pressure_force -= mass_i * ps->mass[j] * pressure_val * spiky_kernel_gradient(r, dist, params);
 							viscosity_force += params->viscosityCoefficient * ps->mass[j] *
 							                   ((ps->vel[j] - vel_i) / density_j) *
 							                   viscosity_kernel_laplacian(dist, params);

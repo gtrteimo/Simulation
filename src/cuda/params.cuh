@@ -12,14 +12,14 @@ const SimulationParams SimulationParams_Default = {
     0.0728f,                            // surfaceTensionCoefficient (N/m, like water-air)
     7.0f,                               // surfaceTensionThreshold
     {0.0f, -9.81f, 0.0f, 0.0f},         // gravity (m/s^2)
-    {-0.5f, -0.5f, -0.5f, -0.5f},       // min AABB
-    {0.5f, 0.5f, 0.5f, 0.5f},           // max AABB
+    {-0.5f, -0.5f, -0.5f, 1.0f},       // min AABB
+    {0.5f, 0.5f, 0.5f, 1.0f},           // max AABB
     -0.5f,                              // boundaryDamping (negative for reflection with damping)
     3000.0f,                            // wallStiffness
     0.0016f,                            // smoothingRadiusSq (h^2)
-    315.5767f * M_PI *pow(0.04f, 9.0f), // poly6KernelCoeff
-    -45.0f * M_PI *pow(0.04f, 6.0f),    // spikyKernelGradientCoeff
-    45.0f * M_PI *pow(0.04f, 6.0f)      // viscosityKernelLaplacianCoeff
+    315.5767f / M_PI *pow(0.02f, 9.0f), // poly6KernelCoeff
+    -45.0f / M_PI *pow(0.02f, 6.0f),    // spikyKernelGradientCoeff
+    45.0f / M_PI *pow(0.02f, 6.0f)      // viscosityKernelLaplacianCoeff
 };
 
 // --- Host Memory Functions ---

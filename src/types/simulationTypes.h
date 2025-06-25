@@ -39,6 +39,8 @@ struct SimulationParams {
     float poly6KernelCoeff;
     float spikyKernelGradientCoeff;
     float viscosityKernelLaplacianCoeff;
+    float poly6KernelGradientCoeff;
+    float poly6KernelLaplacianCoeff;
 };
 
 struct ParticleSystem {
