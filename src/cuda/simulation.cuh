@@ -16,8 +16,8 @@ struct Simulation {
 	SimulationParams *host_params = nullptr;
 	GridData *host_grid = nullptr;
 
-    Simulation *host_sim;
-    Simulation *device_sim;
+	Simulation *host_sim;
+	Simulation *device_sim;
 };
 
 Simulation *Simulation_Create(int numParticles);
