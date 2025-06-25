@@ -5,7 +5,7 @@
 // This file should contain only simulation-related data structures. GUI structs go somewhere else.
 
 struct GridData {
-    unsigned int* particle_hashes;
+    unsigned long long* particle_hashes;
     unsigned int* particle_indices;
     unsigned int* cell_starts;
     unsigned int* cell_ends;
@@ -14,7 +14,7 @@ struct GridData {
     float invGridCellSize;
     float4 domainMin;
     int4 gridDimensions;
-    unsigned int numGridCells; // WARNING: Can overflow for large 4D grids
+    unsigned long long numGridCells; // WARNING: Can overflow for large 4D grids
 };
 
 struct SimulationParams {

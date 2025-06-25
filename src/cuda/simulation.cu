@@ -1,5 +1,3 @@
-// simulation.cu
-
 #include "simulation.cuh"
 #include <thrust/sort.h>
 #include <thrust/device_ptr.h>
@@ -54,7 +52,7 @@ __device__ inline float poly6_kernel_laplacian(float r_sq, const SimulationParam
 // --- Simulation Lifecycle Functions ---
 
 Simulation *Simulation_Create(int numParticles) {
-    Simulation *sim = new Simulation();
+    Simulation *sim = (Simulation *)malloc(sizeof(Simulation));
     if (!sim) {
         fprintf(stderr, "Failed to allocate Simulation struct on host.\n");
         return nullptr;
@@ -63,8 +61,6 @@ Simulation *Simulation_Create(int numParticles) {
     // Allocate host structures
     sim->host_ps = ParticleSystem_CreateOnHost(numParticles);
     sim->host_params = SimulationParams_CreateOnHost();
-    *sim->host_params = SimulationParams_Default; // Initialize with default values
-    SimulationParams_PrecomputeKernelCoefficients(*sim->host_params);
     sim->host_grid = GridData_CreateOnHost(numParticles, sim->host_params);
 
     // Allocate device structures
@@ -72,11 +68,10 @@ Simulation *Simulation_Create(int numParticles) {
     sim->device_params = SimulationParams_CreateOnDevice();
     sim->device_grid = GridData_CreateOnDevice(numParticles, sim->host_params);
 
-    // Set initial numParticles on device
-    ParticleSystem_SetNumParticlesOnDevice(sim->device_ps, numParticles);
+    sim->host_sim = sim;
+    CHECK_CUDA_ERROR(cudaMalloc((void**)&sim->device_sim, sizeof(Simulation)));
 
-    // Copy initial parameters to device
-    Simulation_CopyParameters_HostToDevice(sim);
+    CHECK_CUDA_ERROR(cudaMemcpy(sim->device_sim, sim->host_sim, sizeof(Simulation), cudaMemcpyHostToDevice));
 
     return sim;
 }
@@ -86,15 +81,14 @@ void Simulation_Free(Simulation *sim) {
         // Free device memory
         ParticleSystem_FreeOnDevice(sim->device_ps);
         SimulationParams_FreeOnDevice(sim->device_params);
-        GridData_Device_Free(sim->device_grid);
+        GridData_FreeOnDevice(sim->device_grid);
 
         // Free host memory
         ParticleSystem_FreeOnHost(sim->host_ps);
         SimulationParams_FreeOnHost(sim->host_params);
         GridData_FreeOnHost(sim->host_grid);
-
-        // Free the main struct
-        delete sim;
+        CHECK_CUDA_ERROR(cudaFree(sim->device_sim));
+        free(sim);
     }
 }
 
@@ -141,75 +135,36 @@ void Simulation_CopyGrid_DeviceToHost(Simulation *sim) {
 
 // --- Simulation Control Functions ---
 
-void Simulation_BuildGrid(Simulation *sim) {
-    unsigned int numParticles = sim->host_ps->numParticles; // Assume this doesn't change mid-sim
-    dim3 threads(256);
-    dim3 blocks((numParticles + threads.x - 1) / threads.x);
+void Simulation_Step(Simulation *h_sim, float dt) {
 
-    // 1. Calculate a hash for each particle based on its grid cell location.
-    Grid_CalculateHashesKernel<<<blocks, threads>>>(sim->device_ps, sim->device_grid);
-    CHECK_CUDA_ERROR(cudaGetLastError());
-
-    // 2. Sort particles by hash using Thrust.
-    // This reorders particle_indices so that particles in the same cell are adjacent.
-    GridData h_grid_ptrs;
-    CHECK_CUDA_ERROR(cudaMemcpy(&h_grid_ptrs, sim->device_grid, sizeof(GridData), cudaMemcpyDeviceToHost));
-    
-    thrust::device_ptr<unsigned int> hashes_ptr(h_grid_ptrs.particle_hashes);
-    thrust::device_ptr<unsigned int> indices_ptr(h_grid_ptrs.particle_indices);
-
-    try {
-        thrust::sort_by_key(thrust::device, hashes_ptr, hashes_ptr + numParticles, indices_ptr);
-    } catch (thrust::system_error &e) {
-        fprintf(stderr, "Thrust sort_by_key failed: %s\n", e.what());
-        return;
-    }
-    CHECK_CUDA_ERROR(cudaGetLastError());
-
-    // 3. Find cell start and end indices.
-    // First, reset cell bounds arrays.
-    unsigned int numGridCells = h_grid_ptrs.numGridCells;
-    dim3 grid_blocks((numGridCells + threads.x - 1) / threads.x);
-    
-    Grid_InitCellStartsKernel<<<grid_blocks, threads>>>(h_grid_ptrs.cell_starts, numGridCells, numParticles);
-    Grid_InitCellEndsKernel<<<grid_blocks, threads>>>(h_grid_ptrs.cell_ends, numGridCells, 0);
-    CHECK_CUDA_ERROR(cudaGetLastError());
-    
-    // Now, find the bounds using the sorted hashes.
-    Grid_FindCellBoundsKernel<<<blocks, threads>>>(h_grid_ptrs.particle_hashes, sim->device_grid, numParticles);
-    CHECK_CUDA_ERROR(cudaGetLastError());
-}
-
-void Simulation_Step(Simulation *sim, float dt) {
-    unsigned int numParticles = sim->host_ps->numParticles;
+    unsigned int numParticles = h_sim->host_ps->numParticles;
     dim3 threads(256);
     dim3 blocks((numParticles + threads.x - 1) / threads.x);
 
     // 1. Update spatial grid for neighbor search
-    Simulation_BuildGrid(sim);
+    Grid_Build(h_sim->device_grid, h_sim->device_ps, h_sim->host_ps->numParticles);
+
+    Simulation *sim = h_sim->device_sim; // Use device pointer for kernels
 
     // 2. Reset forces from previous step
     Simulation_Kernel_ResetForces<<<blocks, threads>>>(sim);
-    CHECK_CUDA_ERROR(cudaGetLastError());
 
     // 3. Compute density and pressure
     Simulation_Kernel_ComputeDensityPressure<<<blocks, threads>>>(sim);
-    CHECK_CUDA_ERROR(cudaGetLastError());
 
     // 4. Compute internal forces (pressure + viscosity)
     Simulation_Kernel_ComputeInternalForces<<<blocks, threads>>>(sim);
-    CHECK_CUDA_ERROR(cudaGetLastError());
     
     // 5. Compute surface tension force
     Simulation_Kernel_ComputeSurfaceTension<<<blocks, threads>>>(sim);
-    CHECK_CUDA_ERROR(cudaGetLastError());
 
     // 6. Apply external forces (gravity) and boundary conditions
     Simulation_Kernel_ApplyExternalAndBoundaryForces<<<blocks, threads>>>(sim);
-    CHECK_CUDA_ERROR(cudaGetLastError());
 
     // 7. Integrate particle positions and velocities
     Simulation_Kernel_IntegrateStepKernel<<<blocks, threads>>>(sim, dt);
+
+    // Check for errors after kernel launches
     CHECK_CUDA_ERROR(cudaGetLastError());
 }
 
@@ -236,7 +191,6 @@ __global__ void Simulation_Kernel_ComputeDensityPressure(Simulation *sim) {
     // Get the grid cell coordinates for particle i
     int4 cell_coords_i = Grid_GetCellCoords(pos_i, grid);
 
-    // Iterate through the 3x3x3x3 neighborhood of cells (including the particle's own cell)
     for (int dw = -1; dw <= 1; ++dw) {
         for (int dz = -1; dz <= 1; ++dz) {
             for (int dy = -1; dy <= 1; ++dy) {
@@ -269,7 +223,7 @@ __global__ void Simulation_Kernel_ComputeDensityPressure(Simulation *sim) {
     }
     
     ps->density[i] = density;
-    // Tait's equation of state to compute pressure
+    // Simplified Tait's equation of state to compute pressure
     ps->pressure[i] = params->gasConstantK * (density - params->restDensity);
     if (ps->pressure[i] < 0.0f) {
         ps->pressure[i] = 0.0f;

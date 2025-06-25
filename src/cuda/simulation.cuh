@@ -15,6 +15,9 @@ struct Simulation {
 	ParticleSystem *host_ps = nullptr;
 	SimulationParams *host_params = nullptr;
 	GridData *host_grid = nullptr;
+
+    Simulation *host_sim;
+    Simulation *device_sim;
 };
 
 Simulation *Simulation_Create(int numParticles);
@@ -39,17 +42,7 @@ void Simulation_CopyGrid_DeviceToHost(Simulation *sim);
 // This function orchestrates calls to various CUDA kernels.
 // - sim: Contains all necessary data, but only device data is used.
 // - dt: The time step for this simulation update.
-void Simulation_Step(
-    Simulation *sim,
-    float dt);
-
-// Function to build or update the spatial grid for neighbor search.
-// This involves:
-// 1. Calculating hashes (Grid_CalculateHashesKernel).
-// 2. Sorting particles by hash (host-side library call like thrust::sort_by_key).
-// 3. Finding cell bounds (Grid_FindCellBoundsKernel).
-// Modifies grid data within sim->device_grid.
-void Simulation_BuildGrid(Simulation *sim);
+void Simulation_Step(Simulation *sim, float dt);
 
 // --- Simulation Kernel ---
 

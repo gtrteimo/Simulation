@@ -5,7 +5,7 @@
 #include <math.h>
 
 const SimulationParams SimulationParams_Default = {
-    0.04f, // smoothingRadius (4cm)
+    0.02f, // smoothingRadius (2cm)
     20.0f, // gasConstantK
     1000.0f, // restDensity (kg/m^3, like water)
     0.05f, // viscosityCoefficient

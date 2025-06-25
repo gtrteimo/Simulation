@@ -12,7 +12,7 @@ __host__ void GridData_FreeOnHost(GridData* grid_data); // Frees host struct onl
 // --- Device Functions ---
 
 __host__ GridData* GridData_CreateOnDevice(int numParticles, const SimulationParams* params); // Allocates device memory and copies parameters
-__host__ void GridData_Device_Free(GridData* grid_data); // Frees device memory
+__host__ void GridData_FreeOnDevice(GridData* grid_data); // Frees device memory
 __host__ void GridData_CopyParamsToDevice(GridData* host_grid_data, GridData* device_grid_data); // Copies host params to device struct
 
 // --- Utility Device Functions ---
@@ -45,7 +45,7 @@ __device__ inline int4 Grid_GetCellCoords(float4 pos, const GridData* grid_data)
     return cell_i;
 }
 
-__device__ inline unsigned int Grid_GetHashFromCell(int4 cell_coords, const GridData* grid_data) {
+__device__ inline unsigned long long Grid_GetHashFromCell(int4 cell_coords, const GridData* grid_data) {
     if (cell_coords.x < 0 || cell_coords.y < 0 || cell_coords.z < 0 || cell_coords.w < 0 ||
         cell_coords.x >= grid_data->gridDimensions.x ||
         cell_coords.y >= grid_data->gridDimensions.y ||
@@ -56,34 +56,34 @@ __device__ inline unsigned int Grid_GetHashFromCell(int4 cell_coords, const Grid
     }
 
     // Linear index (hash) based on X then Y then Z then W changing slowest
-    unsigned int Dx = static_cast<unsigned int>(grid_data->gridDimensions.x);
-    unsigned int Dy = static_cast<unsigned int>(grid_data->gridDimensions.y);
-    unsigned int Dz = static_cast<unsigned int>(grid_data->gridDimensions.z);
+    unsigned long long Dx = static_cast<unsigned long long>(grid_data->gridDimensions.x);
+    unsigned long long Dy = static_cast<unsigned long long>(grid_data->gridDimensions.y);
+    unsigned long long Dz = static_cast<unsigned long long>(grid_data->gridDimensions.z);
 
-    unsigned int hash = static_cast<unsigned int>(
-        static_cast<unsigned int>(cell_coords.w) * Dx * Dy * Dz +
-        static_cast<unsigned int>(cell_coords.z) * Dx * Dy +
-        static_cast<unsigned int>(cell_coords.y) * Dx +
-        static_cast<unsigned int>(cell_coords.x)
+    unsigned long long hash = static_cast<unsigned long long>(
+        static_cast<unsigned long long>(cell_coords.w) * Dx * Dy * Dz +
+        static_cast<unsigned long long>(cell_coords.z) * Dx * Dy +
+        static_cast<unsigned long long>(cell_coords.y) * Dx +
+        static_cast<unsigned long long>(cell_coords.x)
     );
 
     return hash; // In range [0, numGridCells-1] for valid cells
 }
 
-__device__ inline unsigned int Grid_GetLinearCellIndex(int4 cell_coords, const GridData* grid_data) {
+__device__ inline unsigned long long Grid_GetLinearCellIndex(int4 cell_coords, const GridData* grid_data) {
      return Grid_GetHashFromCell(cell_coords, grid_data); // Same as hash for this mapping
 }
 
-__device__ inline int4 Grid_GetGridCoordsFromLinearIndex(unsigned int linear_index, const GridData* grid_data) {
+__device__ inline int4 Grid_GetGridCoordsFromLinearIndex(unsigned long long linear_index, const GridData* grid_data) {
     int4 coords;
-    unsigned int Dx = static_cast<unsigned int>(grid_data->gridDimensions.x);
-    unsigned int Dy = static_cast<unsigned int>(grid_data->gridDimensions.y);
-    unsigned int Dz = static_cast<unsigned int>(grid_data->gridDimensions.z);
+    unsigned long long Dx = static_cast<unsigned long long>(grid_data->gridDimensions.x);
+    unsigned long long Dy = static_cast<unsigned long long>(grid_data->gridDimensions.y);
+    unsigned long long Dz = static_cast<unsigned long long>(grid_data->gridDimensions.z);
 
     coords.w = linear_index / (Dx * Dy * Dz);
-    unsigned int remainder_w = linear_index % (Dx * Dy * Dz);
+    unsigned long long remainder_w = linear_index % (Dx * Dy * Dz);
     coords.z = remainder_w / (Dx * Dy);
-    unsigned int remainder_z = remainder_w % (Dx * Dy);
+    unsigned long long remainder_z = remainder_w % (Dx * Dy);
     coords.y = remainder_z / Dx;
     coords.x = remainder_z % Dx;
 
@@ -98,23 +98,18 @@ __global__ void Grid_CalculateHashesKernel(
 );
 
 __global__ void Grid_FindCellBoundsKernel(
-    const unsigned int* d_sorted_particle_hashes,
+    const unsigned long long* d_sorted_particle_hashes,
     GridData* grid_data,
     int numParticles
 );
 
 // --- Initialization Kernels (Called from CreateOnDevice) ---
 
-// Initializes cell_starts array (typically to numParticles or UINT_MAX)
-__global__ void Grid_InitCellStartsKernel(
-    unsigned int* d_cell_starts,
-    unsigned int numGridCells,
-    unsigned int init_value
-);
+__global__ void Grid_InitArrayKernel(
+    unsigned int* array,
+    unsigned long long num_elements,
+    unsigned int value);
 
-// Initializes cell_ends array (typically to 0)
-__global__ void Grid_InitCellEndsKernel(
-    unsigned int* d_cell_ends,
-    unsigned int numGridCells,
-    unsigned int init_value // Should be 0
-);
+// --- Build Grid Function ---
+
+__host__ void Grid_Build(GridData* grid_data, const ParticleSystem* ps, int numParticles);
