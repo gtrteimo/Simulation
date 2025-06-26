@@ -15,10 +15,6 @@ void checkIfCopyPossible(ParticleSystem *ps_host, ParticleSystem *ps_device) {
 		fprintf(stderr, "Error: Particle count mismatch between host and device ParticleSystem.\n");
 		exit(-101);
 	}
-	if (ps_host->numParticles == 0) {
-		fprintf(stderr, "Error: Particle count must be greater than zero for copy operation.\n");
-		exit(-102);
-	}
 }
 
 // --- Host Memory Functions ---

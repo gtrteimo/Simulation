@@ -48,27 +48,22 @@ void Simulation_Step(Simulation *sim, float dt);
 
 // Kernel to reset forces for all particles to zero.
 __global__ void Simulation_Kernel_ResetForces(
-    Simulation *sim);
+    ParticleSystem *ps);
 
 // Kernel to compute density and pressure for each particle.
 // Uses the spatial grid for efficient neighbor lookup.
-__global__ void Simulation_Kernel_ComputeDensityPressure(
-    Simulation *sim);
+__global__ void Simulation_Kernel_ComputeDensityPressure(ParticleSystem *ps, const SimulationParams *params, const GridData *grid);
 
 // Kernel to compute internal SPH forces (pressure, viscosity).
-__global__ void Simulation_Kernel_ComputeInternalForces(
-    Simulation *sim);
+__global__ void Simulation_Kernel_ComputeInternalForces(ParticleSystem *ps, const SimulationParams *params, const GridData *grid);
+
 // Kernel to compute surface tension forces (e.g., using color field method).
 // This involves calculating color field gradients (normals) and Laplacians.
-__global__ void Simulation_Kernel_ComputeSurfaceTension(
-    Simulation *sim);
+__global__ void Simulation_Kernel_ComputeSurfaceTension(ParticleSystem *ps, const SimulationParams *params, const GridData *grid);
 
 // Kernel to apply external forces (e.g., gravity) and handle boundary interactions.
-__global__ void Simulation_Kernel_ApplyExternalAndBoundaryForces(
-    Simulation *sim);
+__global__ void Simulation_Kernel_ApplyExternalAndBoundaryForces(ParticleSystem *ps, const SimulationParams *params);
 
 // Kernel to integrate particle positions and velocities using current forces.
 // (e.g., Leapfrog, Verlet, or Symplectic Euler integration)
-__global__ void Simulation_Kernel_IntegrateStepKernel(
-    Simulation *sim,
-    float dt);
+__global__ void Simulation_Kernel_IntegrateStep(ParticleSystem *ps, float dt);

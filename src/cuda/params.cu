@@ -78,7 +78,7 @@ __host__ void SimulationParams_PrecomputeKernelCoefficients(SimulationParams &pa
 		// Gradient of Poly6 kernel
 		params.poly6KernelGradientCoeff = -945.0f / (32.0f * PI_F * h9);
 		// Laplacian of Poly6 kernel
-		params.poly6KernelLaplacianCoeff = -945.0f / (32.0f * PI_F * h9);
+		params.poly6KernelLaplacianCoeff = 945.0f / (32.0f * PI_F * h9);
 	} else {
 		// ... (zeroing out coefficients)
 		params.poly6KernelGradientCoeff = 0.0f;

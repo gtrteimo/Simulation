@@ -12,8 +12,8 @@ const SimulationParams SimulationParams_Default = {
     0.0728f,                            // surfaceTensionCoefficient (N/m, like water-air)
     7.0f,                               // surfaceTensionThreshold
     {0.0f, -9.81f, 0.0f, 0.0f},         // gravity (m/s^2)
-    {-0.5f, -0.5f, -0.5f, 1.0f},       // min AABB
-    {0.5f, 0.5f, 0.5f, 1.0f},           // max AABB
+    {-1.0f, -1.0f, -1.0f, -1.0f},       // min AABB
+    {1.0f, 1.0f, 1.0f, 1.0f},           // max AABB
     -0.5f,                              // boundaryDamping (negative for reflection with damping)
     3000.0f,                            // wallStiffness
     0.0016f,                            // smoothingRadiusSq (h^2)
