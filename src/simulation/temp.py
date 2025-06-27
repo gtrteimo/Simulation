@@ -14,14 +14,15 @@ def combine_files_in_folder():
     print("Starting file combination process...")
     
     # Get a list of all items (files and directories) in the current folder.
-    all_items = os.listdir("./src/cuda")
+    all_items = os.listdir("./src/simulation")
 
     # We will collect the paths of the files we actually want to copy here.
     files_to_copy = []
     
     for filename in sorted(all_items): # Sorting makes the order predictable
             
-        # If it passed all checks, it's a file we want to copy.
+        if filename == "temp.py": continue  # Skip this script itself.
+        if filename == "info.txt": continue  # Skip the info file.
         files_to_copy.append(filename)
 
     print(f"\nFound {len(files_to_copy)} files to combine.")
@@ -39,7 +40,7 @@ def combine_files_in_folder():
                 outfile.write(separator)
                 
                 # Open the source file in 'read binary' mode ('rb').
-                with open("src/cuda/"+filename, 'rb') as infile:
+                with open("src/simulation/"+filename, 'rb') as infile:
                     # shutil.copyfileobj is efficient for copying file contents.
                     shutil.copyfileobj(infile, outfile)
 

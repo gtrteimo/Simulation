@@ -12,3 +12,7 @@ gtrteimo: AMD??? Intel?? Whatever else exists?? Not everyone has a Nvidia GPU!
             Also i deleted the info.txt in the include so i know where to expect the continuation of this discussion.
             About CMake variable/option i have no idea how to do that but i know who knows. Anyways this branch should
             compile before i think about that.
+
+21ChiNat: Forget hardware independency. I can now simulate one step with 1M Particles in 3 s and am now going to add 
+            display logic, which of course is going onto the GPU. I think this is a great file and should get more 
+            contributions, comment and discussions. Maybe also a format to make it uniform
