@@ -1,10 +1,10 @@
 #pragma once
 
-#include "cuda/util.cuh"
-#include "cuda/params.cuh"
-#include "cuda/particles.cuh"
-#include "cuda/grid.cuh"
-#include "cuda/util.cuh"
+#include "simulation/util.cuh"
+#include "simulation/params.cuh"
+#include "simulation/particles.cuh"
+#include "simulation/grid.cuh"
+#include "simulation/util.cuh"
 #include "types/simulationTypes.h"
 
 struct Simulation {

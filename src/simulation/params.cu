@@ -1,5 +1,5 @@
-#include "cuda/params.cuh"
-#include "cuda/util.cuh"
+#include "simulation/params.cuh"
+#include "simulation/util.cuh"
 
 // --- Host Memory Functions ---
 

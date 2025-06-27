@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types/simulationTypes.h" // For GridData, ParticleSystem, SimulationParams
-#include "cuda/util.cuh"           // For CHECK_CUDA_ERROR
+#include "simulation/util.cuh"           // For CHECK_CUDA_ERROR
 
 // --- Host Functions ---
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cuda/util.cuh"
+#include "simulation/util.cuh"
 #include "types/simulationTypes.h"
 #include <math.h>
 

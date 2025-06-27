@@ -384,7 +384,7 @@ __global__ void Simulation_Kernel_ApplyExternalAndBoundaryForces(ParticleSystem 
 		force.x += params->wallStiffness * (params->min.x - pos.x);
 		if (vel.x < 0) force.x += params->boundaryDamping * vel.x;
 	}
-	if (pos.x > params->max.x) {
+	if (pos.x > params->max.x) { 
 		force.x += params->wallStiffness * (params->max.x - pos.x);
 		if (vel.x > 0) force.x += params->boundaryDamping * vel.x;
 	}
@@ -405,7 +405,6 @@ __global__ void Simulation_Kernel_ApplyExternalAndBoundaryForces(ParticleSystem 
 		if (vel.z > 0) force.z += params->boundaryDamping * vel.z;
 	}
 	// Note: 4th dimension boundary is disabled in main.cpp by setting min.w > max.w.
-	// This logic is correct if you enable it later.
 	if (pos.w < params->min.w) {
 		force.w += params->wallStiffness * (params->min.w - pos.w);
 		if (vel.w < 0) force.w += params->boundaryDamping * vel.w;

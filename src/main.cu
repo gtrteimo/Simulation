@@ -1,4 +1,4 @@
-#include "cuda/simulation.cuh"
+#include "simulation/simulation.cuh"
 #include <chrono>
 #include <iostream>
 #include <fstream>
