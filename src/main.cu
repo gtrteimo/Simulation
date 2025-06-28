@@ -13,10 +13,10 @@ void write_to_csv(const std::string &filename, float4 *positions, size_t num_pos
 		return;
 	}
 
-	// Header for CSV
 	file << "x;y;z;w\n";
 
-	for (size_t i = 0; i < num_positions; ++i) {
+	// Write every 10th particle to keep file size manageable
+	for (size_t i = 0; i < num_positions; i+= 1) {
 		file << positions[i].x << ";" << positions[i].y << ";" << positions[i].z << ";" << positions[i].w << "\n";
 	}
 
@@ -31,16 +31,15 @@ int main(void) {
 		return -1;
 	}
 
-	// --- SETUP PARTICLE INITIAL POSITIONS ---
+	const float particleMass = 1.0f;
+	const int particlesX = 50;
+	const int particlesY = 50;
+	const int particlesZ = 50;
+	const int maxParticles = particlesX * particlesY * particlesZ;
 
-	const int particlesX = 10;
-	const int particlesY = 10;
-	const int particlesZ = 10;
-	const int numParticles = particlesX * particlesY * particlesZ;
+	Simulation *sim = Simulation_Create(maxParticles);
 
-	Simulation *sim = Simulation_Create(numParticles);
-
-	const float particleSpacing = 0.05f;
+	const float particleSpacing = 0.02f;
 
 	const float cubeWidth = static_cast<float>(particlesX -1) * particleSpacing;
 	const float cubeHeight = static_cast<float>(particlesY - 1) * particleSpacing;
@@ -54,64 +53,68 @@ int main(void) {
 	for (int i = 0; i < particlesX; ++i) {
 		for (int j = 0; j < particlesY; ++j) {
 			for (int k = 0; k < particlesZ; ++k) {
-				if (p_idx >= numParticles) break;
-
+				if (p_idx >= maxParticles) break;
+				/*
 				float x = startX + static_cast<float>(i) * particleSpacing;
 				float y = startY + static_cast<float>(j) * particleSpacing;
 				float z = startZ + static_cast<float>(k) * particleSpacing;
+				*/
+				float x = startX + std::rand()%particlesX * particleSpacing;
+				float y = startY + std::rand()%particlesY * particleSpacing;
+				float z = startZ + std::rand()%particlesZ * particleSpacing;
 
 				sim->host_ps->pos[p_idx] = make_float4(x, y, z, 0.0f);
 				sim->host_ps->vel[p_idx] = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-				sim->host_ps->mass[p_idx] = 1000.0f;
+				sim->host_ps->mass[p_idx] = particleMass;
 
 				p_idx++;
 			}
 		}
 	}
-    // Make sure the host particle count is correct
+    // Set the initial number of particles to all the ones we just created.
     sim->host_ps->numParticles = p_idx;
 
-	// --- APPLY STABLE SIMULATION PARAMETERS ---
-	sim->host_params->smoothingRadius = particleSpacing * 2.0f; // A larger radius helps prevent particle pairing and improves stability
-	sim->host_params->restDensity = 1000.0f / (cubeDepth* cubeWidth * cubeHeight / numParticles);
-	sim->host_params->gasConstantK = 200.0f;          // Stiffness constant. Higher = less compressible.
-	sim->host_params->viscosityCoefficient = 0.05f;   // Damps oscillations.
-	sim->host_params->wallStiffness = 10000.0f;       // Penalty force stiffness for boundaries
-	sim->host_params->boundaryDamping = -0.9f * 2.0f * sqrt(sim->host_ps->mass[0] * sim->host_params->wallStiffness); // Critical damping
-    sim->host_params->gravity = make_float4(0.0f, -9.81f, 0.0f, 0.0f);
+	sim->host_params->smoothingRadius = particleSpacing * 2.0f;
+	sim->host_params->restDensity = 4.0f * (particleMass * maxParticles) / (cubeWidth * cubeHeight * cubeDepth);
+	sim->host_params->gasConstantK = 20.0f;
+	sim->host_params->viscosityCoefficient = 0.05f;
+	sim->host_params->boundaryDamping = 0.60f;
+    sim->host_params->gravity = make_float4(0.0f, 0.0f, -9.81f, 0.0f);
 
 	SimulationParams_PrecomputeKernelCoefficients(*sim->host_params);
-    Grid_CalculateParams(sim->host_grid, sim->host_params); // Recalculate grid params on host
+
+    Grid_CalculateParams(sim->host_grid, sim->host_params);
 
 	Simulation_CopyAll_HostToDevice(sim);
 
-	// Test writing initial state
 	Simulation_CopyParticles_DeviceToHost(sim);
-	write_to_csv("output_0.csv", sim->host_ps->pos, sim->host_ps->numParticles);
 
-	printf("Starting Simulation with %d particles.\n", p_idx);
+	printf("Starting Simulation with %d particles.\n", sim->host_ps->numParticles);
 
 	auto start_time = std::chrono::high_resolution_clock::now();
 
-	const int num_steps = 5000;
-	// CRITICAL: A very small fixed time step is required for stability without an adaptive scheme.
-	// This is a common source of explosions.
-	const float dt = 0.001f;
+	const int num_steps = 15000;
+	const float dt = 0.0004f;
 
-	for (int step = 1; step <= num_steps; ++step) {
+	Simulation_SetActiveParticles(sim, 1);
+
+	int step = 1;
+	printf("--- Starting Simulation ---\n");
+	while (step < num_steps) {
 		Simulation_Step(sim, dt);
 
-        if (step % 50 == 0) {
+        if (step % 250 == 0) {
+			Simulation_SetActiveParticles(sim, step);
 		    Simulation_CopyParticles_DeviceToHost(sim);
 		    write_to_csv("output_" + std::to_string(step) + ".csv", sim->host_ps->pos, sim->host_ps->numParticles);
         }
-		printf("Step %d / %d completed. (dt=%.5f)\r", step, num_steps, dt);
+		printf("Step %d / %d completed. (Active Particles: %u)\r", step, num_steps, sim->host_ps->numParticles);
         fflush(stdout);
+		step++;
 	}
 
 	printf("\nSimulation steps completed.\n");
-	cudaDeviceSynchronize(); // Wait for all GPU work to finish before stopping the timer
+	cudaDeviceSynchronize();
 
 	auto end_time = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> duration_ms = end_time - start_time;

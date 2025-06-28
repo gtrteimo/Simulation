@@ -14,8 +14,7 @@ const SimulationParams SimulationParams_Default = {
     {0.0f, -9.81f, 0.0f, 0.0f},         // gravity (m/s^2)
     {-1.0f, -1.0f, -1.0f, -1.0f},       // min AABB
     {1.0f, 1.0f, 1.0f, 1.0f},           // max AABB
-    -0.5f,                              // boundaryDamping (negative for reflection with damping)
-    3000.0f,                            // wallStiffness
+    0.5f,                              // boundaryDamping (how much velocity is retained when getting reflected by the boundary)
     0.0016f,                            // smoothingRadiusSq (h^2)
     315.5767f / M_PI *pow(0.02f, 9.0f), // poly6KernelCoeff
     -45.0f / M_PI *pow(0.02f, 6.0f),    // spikyKernelGradientCoeff

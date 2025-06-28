@@ -19,7 +19,6 @@ __host__ SimulationParams *SimulationParams_CreateOnHost() {
 	ps->min = SimulationParams_Default.min;
 	ps->max = SimulationParams_Default.max;
 	ps->boundaryDamping = SimulationParams_Default.boundaryDamping;
-	ps->wallStiffness = SimulationParams_Default.wallStiffness;
 	SimulationParams_PrecomputeKernelCoefficients(*ps);
 	return ps;
 }

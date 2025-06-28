@@ -94,7 +94,7 @@ void Simulation_CopyAll_HostToDevice(Simulation *sim) {
 }
 
 void Simulation_CopyParticles_HostToDevice(Simulation *sim) {
-	ParticleSystem_CopyAll_HostToDevice(sim->host_ps, sim->device_ps);
+	ParticleSystem_CopyAll_HostToDevice(sim->host_ps, sim->device_ps, sim->host_ps->maxParticles);
 }
 
 void Simulation_CopyParameters_HostToDevice(Simulation *sim) {
@@ -113,7 +113,7 @@ void Simulation_CopyAll_DeviceToHost(Simulation *sim) {
 }
 
 void Simulation_CopyParticles_DeviceToHost(Simulation *sim) {
-	ParticleSystem_CopyAll_DeviceToHost(sim->host_ps, sim->device_ps);
+	ParticleSystem_CopyAll_DeviceToHost(sim->host_ps, sim->device_ps, sim->host_ps->maxParticles);
 }
 
 void Simulation_CopyParameters_DeviceToHost(Simulation *sim) {
@@ -126,6 +126,11 @@ void Simulation_CopyGrid_DeviceToHost(Simulation *sim) {
 }
 
 // --- Simulation Control Functions ---
+
+void Simulation_SetActiveParticles(Simulation *sim, unsigned int numParticles) {
+	sim->host_ps->numParticles = numParticles;
+	ParticleSystem_SetNumParticlesOnDevice(sim->device_ps, numParticles);
+}
 
 void Simulation_Step(Simulation *h_sim, float dt) {
 
@@ -155,10 +160,10 @@ void Simulation_Step(Simulation *h_sim, float dt) {
 	Simulation_Kernel_ComputeSurfaceTension<<<blocks, threads>>>(d_ps, d_params, d_grid);
 
 	// 6. Apply external forces (gravity) and boundary conditions
-	Simulation_Kernel_ApplyExternalAndBoundaryForces<<<blocks, threads>>>(d_ps, d_params);
+	Simulation_Kernel_ApplyExternalForces<<<blocks, threads>>>(d_ps, d_params);
 
 	// 7. Integrate particle positions and velocities
-	Simulation_Kernel_IntegrateStep<<<blocks, threads>>>(d_ps, dt);
+	Simulation_Kernel_IntegrateStepAndBoundary<<<blocks, threads>>>(d_ps, d_params, dt);
 
 	// Check for errors after kernel launches
 	CHECK_CUDA_ERROR(cudaGetLastError());
@@ -226,7 +231,7 @@ __global__ void Simulation_Kernel_ComputeDensityPressure(ParticleSystem *ps, con
 }
 
 __global__ void Simulation_Kernel_ComputeInternalForces(ParticleSystem *ps, const SimulationParams *params, const GridData *grid) {
-    // ############### CORRECTED KERNEL ###############
+	// ############### CORRECTED KERNEL ###############
 	unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 	if (i >= ps->numParticles) return;
 
@@ -237,7 +242,7 @@ __global__ void Simulation_Kernel_ComputeInternalForces(ParticleSystem *ps, cons
 
 	if (density_i < 1e-6f) return;
 
-    // Use temporary variables to sum the force contributions.
+	// Use temporary variables to sum the force contributions.
 	float4 pressure_force_sum = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 viscosity_force_sum = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -269,17 +274,17 @@ __global__ void Simulation_Kernel_ComputeInternalForces(ParticleSystem *ps, cons
 							float density_j = ps->density[j];
 							if (density_j < 1e-6f) continue;
 
-                            // --- CORRECTED PRESSURE FORCE ---
-                            // Symmetrical pressure term: (p_i/rho_i^2 + p_j/rho_j^2)
+							// --- CORRECTED PRESSURE FORCE ---
+							// Symmetrical pressure term: (p_i/rho_i^2 + p_j/rho_j^2)
 							float pressure_val = (pressure_i / (density_i * density_i)) + (ps->pressure[j] / (density_j * density_j));
-                            // Add the contribution from neighbor j. Note that mass_i is NOT included here.
+							// Add the contribution from neighbor j. Note that mass_i is NOT included here.
 							pressure_force_sum += ps->mass[j] * pressure_val * spiky_kernel_gradient(r, dist, params);
 
-                            // --- CORRECTED VISCOSITY FORCE ---
-                            // Add the contribution from neighbor j. Note that mass_i and viscosity coeff are NOT included here.
+							// --- CORRECTED VISCOSITY FORCE ---
+							// Add the contribution from neighbor j. Note that mass_i and viscosity coeff are NOT included here.
 							viscosity_force_sum += ps->mass[j] *
-							                   ((ps->vel[j] - vel_i) / density_j) *
-							                   viscosity_kernel_laplacian(dist, params);
+							                       ((ps->vel[j] - vel_i) / density_j) *
+							                       viscosity_kernel_laplacian(dist, params);
 						}
 					}
 				}
@@ -287,19 +292,19 @@ __global__ void Simulation_Kernel_ComputeInternalForces(ParticleSystem *ps, cons
 		}
 	}
 
-    // --- FINAL FORCE CALCULATION (PHYSICALLY CORRECT) ---
-    // The total force on particle 'i' is its own mass times the sum of neighbor contributions.
-    // This is done *after* the loop to prevent multiplying by mass_i for every neighbor.
-    float mass_i = ps->mass[i];
+	// --- FINAL FORCE CALCULATION (PHYSICALLY CORRECT) ---
+	// The total force on particle 'i' is its own mass times the sum of neighbor contributions.
+	// This is done *after* the loop to prevent multiplying by mass_i for every neighbor.
+	float mass_i = ps->mass[i];
 
-    // The pressure force is repulsive (acts opposite to the gradient).
-    // Our spiky kernel coefficient is now positive, so we add the negative sign here.
-    float4 final_pressure_force = -mass_i * pressure_force_sum;
+	// The pressure force is repulsive (acts opposite to the gradient).
+	// Our spiky kernel coefficient is now positive, so we add the negative sign here.
+	float4 final_pressure_force = -mass_i * pressure_force_sum;
 
-    // The viscosity force is scaled by the viscosity coefficient.
-    float4 final_viscosity_force = mass_i * params->viscosityCoefficient * viscosity_force_sum;
+	// The viscosity force is scaled by the viscosity coefficient.
+	float4 final_viscosity_force = mass_i * params->viscosityCoefficient * viscosity_force_sum;
 
-    // Add the computed forces to the total force accumulator for this particle.
+	// Add the computed forces to the total force accumulator for this particle.
 	ps->force[i] += final_pressure_force + final_viscosity_force;
 }
 
@@ -367,71 +372,72 @@ __global__ void Simulation_Kernel_ComputeSurfaceTension(ParticleSystem *ps, cons
 	}
 }
 
-__global__ void Simulation_Kernel_ApplyExternalAndBoundaryForces(ParticleSystem *ps, const SimulationParams *params) {
+__global__ void Simulation_Kernel_ApplyExternalForces(ParticleSystem *ps, const SimulationParams *params) {
 	unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 	if (i >= ps->numParticles) return;
 
-	// Apply gravity
 	ps->force[i] += ps->mass[i] * params->gravity;
-
-	// Boundary conditions (penalty method)
-	float4 pos = ps->pos[i];
-	float4 vel = ps->vel[i];
-	float4 force = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	// Check against min/max bounds
-	if (pos.x < params->min.x) {
-		force.x += params->wallStiffness * (params->min.x - pos.x);
-		if (vel.x < 0) force.x += params->boundaryDamping * vel.x;
-	}
-	if (pos.x > params->max.x) { 
-		force.x += params->wallStiffness * (params->max.x - pos.x);
-		if (vel.x > 0) force.x += params->boundaryDamping * vel.x;
-	}
-	if (pos.y < params->min.y) {
-		force.y += params->wallStiffness * (params->min.y - pos.y);
-		if (vel.y < 0) force.y += params->boundaryDamping * vel.y;
-	}
-	if (pos.y > params->max.y) {
-		force.y += params->wallStiffness * (params->max.y - pos.y);
-		if (vel.y > 0) force.y += params->boundaryDamping * vel.y;
-	}
-	if (pos.z < params->min.z) {
-		force.z += params->wallStiffness * (params->min.z - pos.z);
-		if (vel.z < 0) force.z += params->boundaryDamping * vel.z;
-	}
-	if (pos.z > params->max.z) {
-		force.z += params->wallStiffness * (params->max.z - pos.z);
-		if (vel.z > 0) force.z += params->boundaryDamping * vel.z;
-	}
-	// Note: 4th dimension boundary is disabled in main.cpp by setting min.w > max.w.
-	if (pos.w < params->min.w) {
-		force.w += params->wallStiffness * (params->min.w - pos.w);
-		if (vel.w < 0) force.w += params->boundaryDamping * vel.w;
-	}
-	if (pos.w > params->max.w) {
-		force.w += params->wallStiffness * (params->max.w - pos.w);
-		if (vel.w > 0) force.w += params->boundaryDamping * vel.w;
-	}
-
-	ps->force[i] += force;
 }
 
-__global__ void Simulation_Kernel_IntegrateStep(ParticleSystem *ps, float dt) {
+__global__ void Simulation_Kernel_IntegrateStepAndBoundary(ParticleSystem *ps, const SimulationParams *params, float dt) {
 	unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 	if (i >= ps->numParticles) return;
 
 	float mass_i = ps->mass[i];
 	if (mass_i < 1e-6f) return;
 
-	// Symplectic Euler integration
-
-	// a = F / m
+	// --- 1. Symplectic Euler Integration ---
+	float4 vel = ps->vel[i];
 	float4 acceleration = ps->force[i] / mass_i;
 
 	// v(t+dt) = v(t) + a(t) * dt
-	ps->vel[i] += acceleration * dt;
+	vel += acceleration * dt;
 
 	// x(t+dt) = x(t) + v(t+dt) * dt
-	ps->pos[i] += ps->vel[i] * dt;
+	float4 pos = ps->pos[i] + vel * dt;
+
+	// --- 2. Hard Wall Boundary Condition ---
+	const float damping = params->boundaryDamping;
+
+	// X-axis
+	if (pos.x < params->min.x) {
+		pos.x = params->min.x; // Clamp position to the wall boundary
+		vel.x *= -damping;     // Reflect and dampen velocity
+	}
+	if (pos.x > params->max.x) {
+		pos.x = params->max.x;
+		vel.x *= -damping;
+	}
+	// Y-axis
+	if (pos.y < params->min.y) {
+		pos.y = params->min.y;
+		vel.y *= -damping;
+	}
+	if (pos.y > params->max.y) {
+		pos.y = params->max.y;
+		vel.y *= -damping;
+	}
+	// Z-axis
+	if (pos.z < params->min.z) {
+		pos.z = params->min.z;
+		vel.z *= -damping;
+	}
+	if (pos.z > params->max.z) {
+		pos.z = params->max.z;
+		vel.z *= -damping;
+	}
+	// W-axis
+	
+	if (pos.w < params->min.w) {
+		pos.w = params->min.w;
+		vel.w *= -damping;
+	}
+	if (pos.w > params->max.w) {
+		pos.w = params->max.w;
+		vel.w *= -damping;
+	}
+
+	// --- 3. Update Global Memory ---
+	ps->pos[i] = pos;
+	ps->vel[i] = vel;
 }

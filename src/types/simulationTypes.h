@@ -32,7 +32,6 @@ struct SimulationParams {
     // Domain boundaries (Axis-Aligned Bounding Box - AABB)
     float4 min, max;
     float boundaryDamping;      // Damping coefficient for collisions with boundaries (e.g., 0.6 means 60% velocity retained perpendicular to wall)
-    float wallStiffness;        // Stiffness for boundary repulsion penalty force
 
     // Kernel precomputed values (derived from smoothingRadius, crucial for SPH calculations)
     float smoothingRadiusSq;
@@ -53,5 +52,6 @@ struct ParticleSystem {
 	float4 *normal;
 	float *color_laplacian;
 	unsigned int numParticles;
+    unsigned int maxParticles;
 };
 

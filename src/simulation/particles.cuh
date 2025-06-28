@@ -4,24 +4,24 @@
 
 // --- Host Memory Functions ---
 
-__host__ ParticleSystem *ParticleSystem_CreateOnHost(int numParticles);
+__host__ ParticleSystem *ParticleSystem_CreateOnHost(int maxParticles);
 __host__ void ParticleSystem_FreeOnHost(ParticleSystem *ps);
 
 // --- Copy Host to Device Functions ---
 
-__host__ void ParticleSystem_CopyAll_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyPos_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyVel_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyForce_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyMass_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyDensity_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyPressure_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyNormal_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyColorLaplacian_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device);
+__host__ void ParticleSystem_CopyAll_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyPos_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyVel_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyForce_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyMass_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyDensity_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyPressure_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyNormal_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyColorLaplacian_HostToDevice(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
 
 // --- Device Memory Functions ---
 
-__host__ ParticleSystem *ParticleSystem_CreateOnDevice(int numParticles);
+__host__ ParticleSystem *ParticleSystem_CreateOnDevice(int maxParticles);
 __host__ void ParticleSystem_FreeOnDevice(ParticleSystem *ps);
 
 // --- Device Accessor Functions ---
@@ -31,12 +31,12 @@ __host__ unsigned int ParticleSystem_GetNumParticlesOnDevice(ParticleSystem *ps)
 
 // --- Copy Device to Host Functions ---
 
-__host__ void ParticleSystem_CopyAll_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyPos_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyVel_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyForce_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyMass_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyDensity_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyPressure_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyNormal_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
-__host__ void ParticleSystem_CopyColorLaplacian_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device);
+__host__ void ParticleSystem_CopyAll_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyPos_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyVel_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyForce_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyMass_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyDensity_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyPressure_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyNormal_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);
+__host__ void ParticleSystem_CopyColorLaplacian_DeviceToHost(ParticleSystem *ps_host, ParticleSystem *ps_device, unsigned int numParticles);

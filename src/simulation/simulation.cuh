@@ -38,6 +38,8 @@ void Simulation_CopyGrid_DeviceToHost(Simulation *sim);
 
 // --- Simulation control functions ---
 
+void Simulation_SetActiveParticles(Simulation *sim, unsigned int numParticles);
+
 // Main function to advance the SPH simulation by one time step (dt).
 // This function orchestrates calls to various CUDA kernels.
 // - sim: Contains all necessary data, but only device data is used.
@@ -61,9 +63,9 @@ __global__ void Simulation_Kernel_ComputeInternalForces(ParticleSystem *ps, cons
 // This involves calculating color field gradients (normals) and Laplacians.
 __global__ void Simulation_Kernel_ComputeSurfaceTension(ParticleSystem *ps, const SimulationParams *params, const GridData *grid);
 
-// Kernel to apply external forces (e.g., gravity) and handle boundary interactions.
-__global__ void Simulation_Kernel_ApplyExternalAndBoundaryForces(ParticleSystem *ps, const SimulationParams *params);
+// Kernel to apply external forces (e.g., gravity).
+__global__ void Simulation_Kernel_ApplyExternalForces(ParticleSystem *ps, const SimulationParams *params);
 
 // Kernel to integrate particle positions and velocities using current forces.
-// (e.g., Leapfrog, Verlet, or Symplectic Euler integration)
-__global__ void Simulation_Kernel_IntegrateStep(ParticleSystem *ps, float dt);
+// And handle boundary conditions.
+__global__ void Simulation_Kernel_IntegrateStepAndBoundary(ParticleSystem *ps, const SimulationParams *params, float dt);
