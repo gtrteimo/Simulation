@@ -128,8 +128,8 @@ void Simulation_CopyGrid_DeviceToHost(Simulation *sim) {
 // --- Simulation Control Functions ---
 
 void Simulation_SetActiveParticles(Simulation *sim, unsigned int numParticles) {
-	sim->host_ps->numParticles = numParticles;
-	ParticleSystem_SetNumParticlesOnDevice(sim->device_ps, numParticles);
+	sim->host_ps->numParticles = numParticles>sim->host_ps->maxParticles ? sim->host_ps->maxParticles : numParticles;
+	ParticleSystem_SetNumParticlesOnDevice(sim->device_ps, sim->host_ps->numParticles);
 }
 
 void Simulation_Step(Simulation *h_sim, float dt) {

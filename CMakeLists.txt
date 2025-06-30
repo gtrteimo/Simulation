@@ -158,5 +158,5 @@ endif()
 message(STATUS "  C++ Compiler: ${CMAKE_CXX_COMPILER_ID} (${CMAKE_CXX_COMPILER})")
 message(STATUS "  CUDA Compiler: ${CMAKE_CUDA_COMPILER_ID} (${CMAKE_CUDA_COMPILER})")
 message(STATUS "  Using C++ Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "  Using CUDA Standard: ${CMAKE_CUDA_STANDARD}") # Added message
+message(STATUS "  Using CUDA Standard: ${CMAKE_CUDA_STANDARD}")
 message(STATUS "  Building for CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
