@@ -1,7 +1,9 @@
 #pragma once
 
-#include "util/types.h"
 #include <iostream>
+#include <cmath>
+
+#include "util/types.h"
 
 struct vector2 {
     type x;
@@ -30,6 +32,12 @@ struct vector2 {
 	vector2& operator/=(const type scalar);
 
     vector2 operator-() const;
+
+    type magnitudeSq() const;
+    
+    type magnitude() const;
+
+    vector2 normalize() const;
 
     bool isValid() const;
 

@@ -2,6 +2,7 @@
 
 static std::mt19937 rng(std::random_device{}());
 static std::uniform_real_distribution<type> dist0_1(0.0f, 1.0f);
+static std::uniform_real_distribution<type> dist1_1(-1.0f, 1.0f);
 static std::uniform_int_distribution<unsigned int> dist0_255(0, 255);
 
 type randPer() {
@@ -13,7 +14,9 @@ vector2 randPer2() {
 vector3 randPer3() {
     return {randPer(), randPer(), randPer()};
 }
-
+vector2 randPos2() {
+        return {dist1_1(rng), dist1_1(rng)};
+}
 uint8_t randByte() {
     return static_cast<uint8_t>(dist0_255(rng));
 }

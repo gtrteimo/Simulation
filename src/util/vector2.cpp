@@ -6,7 +6,7 @@ vector2 vector2::operator+(const vector2& other) const{
 }
 
 vector2 vector2::operator-(const vector2& other) const {
-    return {x - other.x, y + other.y};
+    return {x - other.x, y - other.y};
 }
 
 vector2 vector2::operator*(type scalar) const {
@@ -56,6 +56,24 @@ vector2 vector2::operator-() const {
 std::ostream& operator<<(std::ostream &os, const vector2 &vec) {
 	os << "(x: " << vec.x << ", y: " << vec.y << ")";
     return os;
+}
+
+type vector2::magnitudeSq() const {
+    return x * x + y * y;
+}
+
+type vector2::magnitude() const {
+    return std::sqrt(magnitudeSq());
+}
+
+vector2 vector2::normalize() const {
+    type mag = magnitude();
+    if (mag == static_cast<type>(0.0)) {
+        // Handle zero-length vector gracefully (e.g., return zero vector or throw error)
+        std::cerr << "Trying to normalize a vector2 what has a magintude/length of 0\n";
+        return {static_cast<type>(0.0), static_cast<type>(0.0)}; // For collision, if length is zero, centers are coincident.
+    }
+    return {x / mag, y / mag};
 }
 
 bool vector2::isValid() const {

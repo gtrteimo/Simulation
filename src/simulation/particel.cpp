@@ -2,6 +2,7 @@
 
 #include "util/log.hpp"
 
+// static uint64_t counter = 0;
 
 /**
  * Constructor...There are default values saved in the header since there are a lot of parameters here.
@@ -11,6 +12,9 @@ Particle::Particle(type mass, type size, vector2 position, vector2 velocity, col
     if (mass <= 0) {
         std::cerr << "Warning: Particle created with non-positive mass (" << this->mass << "). Setting mass to 1.0 to prevent division by zero.\n";
         const_cast<type&>(this->mass) = 1.0; 
+    }
+    while (wallCollision(0)) {
+        this -> position = randPos2();
     }
 }
 
@@ -64,11 +68,14 @@ bool Particle::wallCollision(type dt) {
     return ret;
 }
 
-bool Particle::particelCollision(type dt, std::vector<Particle>& particles) {
+bool Particle::particleCollision(type dt, std::vector<Particle>& particles) {
     for (Particle& particle : particles) {
         vector2 intersection;
         if ((intersection = intersect(dt, particle)).isValid()) {
-            std::cout<<"Hello Collision!\n"; 
+            // std::cout << "Collision: " << counter++ << std::endl;
+            // vector2 temp = velocity;
+            // velocity = -particle.velocity;
+            // particle.velocity = -temp;
         }
     }
     return false;
@@ -76,6 +83,8 @@ bool Particle::particelCollision(type dt, std::vector<Particle>& particles) {
 
 /**
  * Sorry, a lot math and quadratic formula incoming!!
+ * 
+ * This is for people (also for me as i WILL forget) that want to understand what is happening!
  * 
  * When 2 Circles collide the sum of there radii are exactly the distance between the two centers. Big revelation!
  * Thats how we get this: ||position1(x) - position2(x)|| = radius1 + radius2
@@ -125,14 +134,12 @@ vector2 Particle::intersect(type dt, const Particle& particle) {
 
         type xImpact = static_cast<type>(-1.0); // Initialize to an invalid time
 
-        // Find the earliest positive root within the dt interval
-        if (x1 >= static_cast<type>(0.0) && x1 <= dt) {
+       if (x1 >= 0 && x1 <= dt) {
+            // x1 is the first possible impact time. If it's valid, it's our answer.
             xImpact = x1;
-        }
-        if (x2 >= static_cast<type>(0.0) && x2 <= dt) {
-            if (xImpact < static_cast<type>(0.0) || x2 < xImpact) { // check if it smaller then x1
-                xImpact = x2;
-            }
+        } else if (x2 >= 0 && x2 <= dt) {
+            // Otherwise, check x2. This handles cases where x1 is negative (i.e., particles were colliding in the past).
+            xImpact = x2;
         }
         
         /*
@@ -155,26 +162,24 @@ vector2 Particle::intersect(type dt, const Particle& particle) {
 
 
         if (xImpact >= static_cast<type>(0.0) && xImpact <= dt) {
-            // Collision occurred within the time step!
-            // Calculate the positions of the centers at the time of impact
+            // A collision occurred within the time step so the position is calculated
             vector2 impactPosition1 = position + velocity * xImpact;
             vector2 impactPosition2 = particle.position + particle.velocity * xImpact;
 
             // Calculate the vector from center1 to center2 at impact
-            vector2 center_to_center_vec = impactPosition2 - impactPosition1;
+            vector2 distanceCenter = impactPosition2 - impactPosition1;
             
             // Normalize this vector
-            float impactDistance = center_to_center_vec.length();
+            type impactDistance = distanceCenter.magnitude();
             if (impactDistance > static_cast<type>(0.0)) { // Avoid division by zero if centers are coincident
-                vector2 normal_direction = center_to_center_vec.normalize();
+                vector2 normal_direction = distanceCenter.normalize();
 
                 // The direct collision point is on the surface of particle1,
                 // in the direction of particle2, at its radius distance.
                 ret = impactPosition1 + normal_direction * size;
             } else {
-                // If centers are exactly coincident at impact, it's a special case (e.g., full overlap).
-                // You might return one of the center positions or handle this differently based on your game logic.
-                // For now, let's just return the center of the first particle.
+                //Very unlikely! This means the circles perfectly overlap!
+                std::cerr<<"2 Circles perfectly overlap!! Either prevent this or add some logic to this exact line in Particle::intersect()";
                 ret = impactPosition1;
             }
         }
@@ -183,14 +188,16 @@ vector2 Particle::intersect(type dt, const Particle& particle) {
     return ret;
 }
 
-void Particle::printParticle() const {
-    std::cout << "Particle: { "
-        << "  Mass: " << mass << ", "
-        << "  Size: " << size << ", "
-        << "  Position: " << position << ", "
-        << "  Velocity: " << velocity << ", "
-        << "  Acceleration: " << acceleration << ", "
-        << "  Force (pre-reset): " << force << ", "
-        << "  Colour: (R:" << static_cast<uint16_t>(colour.r) << ", G:" << static_cast<uint16_t>(colour.g) << ", B:" << static_cast<uint16_t>(colour.b) << ") "
+std::ostream& operator<<(std::ostream& os, const Particle& particle) {
+    os  << "Particle: { "
+        << "  Mass: " << particle.mass << ", "
+        << "  Size: " << particle.size << ", "
+        << "  Position: " << particle.position << ", "
+        << "  Velocity: " << particle.velocity << ", "
+        << "  Acceleration: " << particle.acceleration << ", "
+        << "  Force (pre-reset): " << particle.force << ", "
+        << "  Colour: (R:" << static_cast<uint16_t>(particle.colour.r) << ", G:" << static_cast<uint16_t>(particle.colour.g) << ", B:" << static_cast<uint16_t>(particle.colour.b) << ") "
         << "}\n";
+    return os;
 }
+

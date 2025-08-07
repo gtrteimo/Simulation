@@ -8,6 +8,7 @@
 type randPer();
 vector2 randPer2();
 vector3 randPer3();
+vector2 randPos2();
 colourRGB randColour();
 colourRGB randDarkColour();
 colourRGB randLightColour();

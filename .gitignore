@@ -2,6 +2,7 @@
 /build
 /out
 /bin
+/log
 /.vs
 /.idea
 CMakeSettings.json

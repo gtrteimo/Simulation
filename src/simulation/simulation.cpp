@@ -7,8 +7,12 @@ static uint64_t middleMouseButtonHeld = 0;
 
 Simulation* Simulation::sim = nullptr;
 
-Simulation::Simulation(uint16_t fps, uint16_t frameWidth, uint16_t frameHeight, uint64_t particleAmount, bool particleCollision) : fps(fps + 1), window(Frame(frameWidth, frameHeight)), draw(Draw(window)), particles(std::vector<Particle>(particleAmount, Particle(1.0))), particleCollision(particleCollision) {sim = this;}
-
+Simulation::Simulation(uint16_t fps, uint16_t frameWidth, uint16_t frameHeight, uint64_t particleAmount, bool particlesCollide): fps(fps + 1), window(Frame(frameWidth, frameHeight)), draw(Draw(window)), particles(particleAmount), particlesCollide(particlesCollide) {
+    std::generate(particles.begin(), particles.end(), []() {
+        return Particle(1.0);
+    });
+    sim = this;
+}
 Simulation::~Simulation() {
 	particles.clear();
 	particles.shrink_to_fit();
@@ -113,6 +117,10 @@ int Simulation::loop(std::function<int(std::vector<Particle>&)> function) {
 
         wallCollision();
 
+        if (particlesCollide) {
+            particleCollision();
+        }
+
 		updatePos();
 
 		draw.clearScreen({0, 0, 0});
@@ -135,8 +143,8 @@ int Simulation::loop(std::function<int(std::vector<Particle>&)> function) {
 
 		auto duration2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end2 - start);
 
-		double currentFps = static_cast<double>(1e9) / static_cast<double>(duration2.count());
-		std::cout << "FPS: " << static_cast<int>(currentFps) << std::endl;
+		// double currentFps = static_cast<double>(1e9) / static_cast<double>(duration2.count());
+		// std::cout << "FPS: " << static_cast<int>(currentFps) << std::endl;
 	}
 	return 0;
 }
@@ -219,13 +227,13 @@ int Simulation::wallCollision() {
     return 0;
 }
 
-int Simulation::particelCollision() {
+int Simulation::particleCollision() {
     if (fps == 0) {
 		return -1;
 	}
 	type dt = static_cast<type>(1.0) / static_cast<type>(fps);
     for (Particle& particle : particles) {
-		particle.particelCollision(dt, particles);
+		particle.particleCollision(dt, particles);
 	}
     return 0;
 }

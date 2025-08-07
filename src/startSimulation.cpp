@@ -1,4 +1,5 @@
 #include "simulation/simulation.hpp"
+#include "util/log.hpp"
 
 int initialiseGLFW() {
 	if (!glfwInit()) {
@@ -28,7 +29,8 @@ int initialiseGLFW() {
 int print(std::vector<Particle>& particles) {
 	// std::cout << "Particle Count: " << particles.size() << "\n";
 	for (Particle particle: particles) {
-	    particle.printParticle(); // Really slow
+	    // std::cout << particle << std::endl; // Really slow
+	    logFile("Test", particle);// Really slow		
 	}
 	// std::cout << std::endl;
 	return 0;
@@ -41,7 +43,7 @@ int startSimulation() {
 		return ret;
 	}
 
-	Simulation test = Simulation(144, 1000, 1000, 1, true);
+	Simulation test = Simulation(144, 1000, 1000, 2, true);
 	test.loop(print);
 	return 0;
 }

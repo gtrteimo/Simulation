@@ -10,9 +10,9 @@
 const static type FRICTION_MULTI = 0.80;
 
 class Particle {
-  private:
-    const type mass;
-    const type size;
+  public:
+    type mass;
+    type size;
     vector2 position;
     vector2 velocity;
     vector2 acceleration = {0, 0};
@@ -20,7 +20,7 @@ class Particle {
     colourRGB colour;
 
   public:
-    Particle(type mass = 1.0, type size = 0.01, vector2 position = {0, 0}, vector2 velocity = {0, 0}, colourRGB colour = randSingleColour());
+    Particle(type mass = 1.0, type size = 0.05, vector2 position = randPos2(), vector2 velocity = {0, 0}, colourRGB colour = randSingleColour());
 
     ~Particle();
 
@@ -33,10 +33,10 @@ class Particle {
     
     void applyForce(const vector2& force);
 
-    void printParticle() const;
-
     bool wallCollision(type dt);
-    bool particelCollision(type dt, std::vector<Particle>& particles);
+    bool particleCollision(type dt, std::vector<Particle>& particles);
   private:
     vector2 intersect(type dt, const Particle& particel);
 };
+
+std::ostream& operator<<(std::ostream& os, const Particle& vec);

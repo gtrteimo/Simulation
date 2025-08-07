@@ -4,6 +4,7 @@
 #include <functional>
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 #include "util/vector2.hpp"
 #include "util/colour.h"
@@ -18,14 +19,14 @@ class Simulation {
     Frame window;
     Draw draw;
     std::vector<Particle> particles;
-    bool particleCollision;
+    bool particlesCollide;
   public:
     static Simulation* sim;
   private:
     inline  int updateAccVel();
     inline  int updatePos();
   public:
-	  Simulation(uint16_t fps = 60, uint16_t frameWidth=1000, uint16_t frameHeight=1000, uint64_t particleAmount=0, bool particleCollision = false);
+	  Simulation(uint16_t fps = 60, uint16_t frameWidth=1000, uint16_t frameHeight=1000, uint64_t particleAmount=0, bool particlesCollide = false);
 	  ~Simulation();
 
     int loop(std::function<int(std::vector<Particle>&)> function);
@@ -39,5 +40,5 @@ class Simulation {
     void addParticle(const vector2& pos, uint64_t amount);
 
     int wallCollision();
-    int particelCollision();
+    int particleCollision();
 };

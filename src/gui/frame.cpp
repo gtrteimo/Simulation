@@ -13,7 +13,7 @@ Frame::Frame(uint16_t width, uint16_t height, const char* title) : window(nullpt
         throw std::runtime_error("Failed to create GLFW window");
     }
 
-    glfwSetWindowPos(window, 920, 28);
+    glfwSetWindowPos(window, 920, 28); //Does not work on Linux (better said on Wayland)
     glfwMakeContextCurrent(window);
 
     static bool glad_initialized = false;
